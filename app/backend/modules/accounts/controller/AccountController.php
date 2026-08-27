@@ -323,6 +323,44 @@ try {
     // Don't echo the password_hash or remember_token to the browser.
     $public = accounts_account_to_public_array($result["account"]);
 
+    // Look up the student's first/last name on a successful authentication
+    // so the front-end can greet the user by their real name (e.g. "Good
+    // morning, Maria") on the next page. We only do this for successful
+    // logins (including the soft-success cases like must_change_password)
+    // to avoid leaking profile data on a wrong-password attempt. The DAO
+    // hydrates only `student_account` columns, so a small targeted SELECT
+    // here is the cleanest way to attach the name without restructuring
+    // the entity / DAO layers.
+    if (
+      $result["success"] &&
+      is_array($public) &&
+      isset($public["student_id"])
+    ) {
+      try {
+        $nameStmt = $connection->prepare(
+          "SELECT first_name, middle_name, last_name " .
+          "FROM students WHERE student_id = :sid LIMIT 1"
+        );
+        $nameStmt->execute([":sid" => (int) $public["student_id"]]);
+        $nameRow = $nameStmt->fetch(PDO::FETCH_ASSOC);
+        if ($nameRow !== false) {
+          $public["first_name"]  = isset($nameRow["first_name"])
+            ? (string) $nameRow["first_name"]
+            : null;
+          $public["middle_name"] = isset($nameRow["middle_name"])
+            ? (string) $nameRow["middle_name"]
+            : null;
+          $public["last_name"]   = isset($nameRow["last_name"])
+            ? (string) $nameRow["last_name"]
+            : null;
+        }
+      } catch (Throwable $ignored) {
+        // The name lookup is purely cosmetic; never let it block a
+        // successful login. Fall back to whatever the account row gives us
+        // (e.g. the username) if the students table is unreachable.
+      }
+    }
+
     $httpStatus = $result["success"] ? 200 : 401;
     if ($result["reason"] === "locked") {
       $httpStatus = 423; // Locked
@@ -480,7 +518,23 @@ try {
         password_hash((string) $password, PASSWORD_BCRYPT)
       );
       $account->setRecoveryEmail(trim($email));
-      $account->setStatus(Account::STATUS_PENDING_VERIFICATION);
+
+      // Self-service signup is "ready to use" out of the box: the student
+      // just chose their own password (it already passed the strength
+      // policy), they have no temporary credential to rotate, and the
+      // email they provided is the one we'll use for recovery. We therefore
+      // flip the two flags that would otherwise force a re-route on
+      // first login (`must_change_password = 1` and
+      // `status = 'Pending Verification'`) and stamp password_changed_at
+      // so audit/lockout logic that reads it gets a real timestamp.
+      //
+      // The "must change your temporary password" / "pending verification"
+      // branches of authenticate() are kept intact for any future
+      // admin-issued-temp-password flow that creates an Account with
+      // a generated credential.
+      $account->setStatus(Account::STATUS_ACTIVE);
+      $account->setMustChangePassword(false);
+      $account->setPasswordChangedAt(date("Y-m-d H:i:s"));
 
       $saved = $dao->create($account);
       $connection->commit();

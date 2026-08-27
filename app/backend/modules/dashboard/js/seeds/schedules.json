@@ -1,0 +1,102 @@
+[
+  {
+    "schedule_id": 10,
+    "section_id": 5,
+    "subject_id": 5,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Monday",
+    "start_time": "09:00:00",
+    "end_time": "10:00:00"
+  },
+  {
+    "schedule_id": 11,
+    "section_id": 5,
+    "subject_id": 8,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Monday",
+    "start_time": "10:00:00",
+    "end_time": "11:00:00"
+  },
+  {
+    "schedule_id": 12,
+    "section_id": 5,
+    "subject_id": 4,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Monday",
+    "start_time": "11:00:00",
+    "end_time": "12:00:00"
+  },
+  {
+    "schedule_id": 13,
+    "section_id": 5,
+    "subject_id": 3,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Monday",
+    "start_time": "12:00:00",
+    "end_time": "13:00:00"
+  },
+  {
+    "schedule_id": 14,
+    "section_id": 5,
+    "subject_id": 7,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Monday",
+    "start_time": "13:00:00",
+    "end_time": "14:00:00"
+  },
+  {
+    "schedule_id": 15,
+    "section_id": 5,
+    "subject_id": 9,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Monday",
+    "start_time": "14:00:00",
+    "end_time": "15:00:00"
+  },
+  {
+    "schedule_id": 16,
+    "section_id": 5,
+    "subject_id": 6,
+    "teacher_id": 4,
+    "room_id": 11,
+    "day_of_week": "Thursday",
+    "start_time": "09:00:00",
+    "end_time": "10:00:00"
+  },
+  {
+    "schedule_id": 17,
+    "section_id": 5,
+    "subject_id": 35,
+    "teacher_id": 2,
+    "room_id": 18,
+    "day_of_week": "Tuesday",
+    "start_time": "09:00:00",
+    "end_time": "10:30:00"
+  },
+  {
+    "schedule_id": 18,
+    "section_id": 5,
+    "subject_id": 36,
+    "teacher_id": 2,
+    "room_id": 18,
+    "day_of_week": "Tuesday",
+    "start_time": "10:30:00",
+    "end_time": "12:00:00"
+  },
+  {
+    "schedule_id": 19,
+    "section_id": 5,
+    "subject_id": 37,
+    "teacher_id": 1,
+    "room_id": 18,
+    "day_of_week": "Wednesday",
+    "start_time": "09:00:00",
+    "end_time": "10:30:00"
+  }
+]

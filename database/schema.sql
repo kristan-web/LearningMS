@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 23, 2026 at 12:01 PM
+-- Generation Time: Aug 27, 2026 at 11:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -205,6 +205,32 @@ CREATE TABLE `assignments` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `assignments`
+--
+
+INSERT INTO `assignments` (`assignment_id`, `schedule_id`, `title`, `instructions`, `due_date`, `max_score`, `created_at`) VALUES
+(1, 13, 'Speech Delivery Practice', 'Prepare and deliver a 3-minute speech on any topic of your choice. Focus on proper articulation, pacing, and audience engagement. Record yourself and submit the video file. Also include a written copy of your speech with annotations on where you applied specific speech techniques.', '2026-09-02 04:51:33', 100.00, '2026-08-28 04:51:33'),
+(2, 13, 'Communication Models Analysis', 'Choose one communication model (Shannon-Weaver, Schramm, or Transactional) and write a 500-word essay analyzing it. Provide real-life examples of how this model applies to everyday communication scenarios. Include a diagram or illustration of the model.', '2026-09-09 04:51:33', 50.00, '2026-08-28 04:51:33'),
+(3, 13, 'Group Presentation: Intercultural Communication', 'In groups of 3-4, prepare a 10-minute presentation on intercultural communication. Discuss barriers, strategies for effective cross-cultural communication, and present a case study of a cross-cultural misunderstanding and how it could have been avoided. Submit your slides and a group reflection paper.', '2026-09-17 04:51:33', 150.00, '2026-08-28 04:51:33'),
+(4, 1, 'Functions and Relations Worksheet', 'Complete the attached worksheet on functions and relations. Show your complete solutions for each problem. Include a graph for each function and identify its domain and range.', '2026-08-26 04:51:33', 50.00, '2026-08-28 04:51:33'),
+(5, 1, 'Business Math: Simple and Compound Interest', 'Solve the 15 problems on simple and compound interest provided. Show your complete solutions and identify which type of interest is being applied. Create a summary table comparing the results of simple vs compound interest for the same principal amount.', '2026-09-05 04:51:33', 75.00, '2026-08-28 04:51:33'),
+(6, 1, 'Logic and Reasoning: Truth Tables', 'Construct truth tables for the given compound propositions. Determine whether each proposition is a tautology, contradiction, or contingency. Also, identify the logical equivalence between the given pairs of propositions.', '2026-09-12 04:51:33', 60.00, '2026-08-28 04:51:33'),
+(7, 2, 'Cell Structure and Function Report', 'Create a detailed report on the structure and function of plant and animal cells. Include labeled diagrams, discuss the functions of major organelles, and explain the differences between the two cell types. Include a section on how cell structures relate to the overall function of organisms.', '2026-08-27 04:51:33', 80.00, '2026-08-28 04:51:33'),
+(8, 2, 'Ecosystem Research Project', 'Choose one ecosystem type (tropical rainforest, coral reef, mangrove, grassland, or freshwater). Research and present its biodiversity, ecological relationships, and current threats. Include conservation recommendations. Submit a written report and a visual infographic.', '2026-09-07 04:51:33', 120.00, '2026-08-28 04:51:33'),
+(9, 2, 'Natural Disasters: Preparedness Plan', 'Research natural disasters common in the Philippines (typhoons, earthquakes, volcanic eruptions, floods). Create a comprehensive family or community disaster preparedness plan. Include evacuation routes, emergency contacts, supply kits, and response protocols.', '2026-09-15 04:51:33', 90.00, '2026-08-28 04:51:33'),
+(10, 14, 'Self-Reflection Essay', 'Write a 300-word essay reflecting on your personal strengths, weaknesses, values, and goals. Identify how these aspects have shaped who you are today and how they can influence your future career choices. Be honest and introspective.', '2026-08-25 04:51:33', 40.00, '2026-08-28 04:51:33'),
+(11, 14, 'Life Goals Timeline', 'Create a visual timeline of your life goals from now until age 30. Include both short-term and long-term goals. For each milestone, identify the steps needed to achieve it and potential obstacles you might face.', '2026-09-04 04:51:33', 60.00, '2026-08-28 04:51:33'),
+(12, 14, 'Stress Management Techniques Video', 'Create a 2-3 minute video presenting various stress management techniques. Demonstrate at least 3 techniques (deep breathing, meditation, exercise, journaling, etc.) and explain how they help in managing stress. Submit the video file with a brief reflection.', '2026-09-11 04:51:33', 100.00, '2026-08-28 04:51:33'),
+(13, 11, 'Philosophical Reflection Paper', 'Choose one philosophical question and write a 500-word reflection paper. Consider: \"What is the meaning of life?\", \"Do we have free will?\", or \"What is the nature of reality?\" Present your arguments and consider counterarguments.', '2026-08-31 04:51:33', 50.00, '2026-08-28 04:51:33'),
+(14, 11, 'Philosophy of Famous Thinkers Analysis', 'Choose two philosophers from different eras (e.g., Plato and Sartre, or Aristotle and Kant). Compare and contrast their views on human existence, ethics, and knowledge. Write a 400-word analysis and create a visual comparison chart.', '2026-09-08 04:51:33', 70.00, '2026-08-28 04:51:33'),
+(15, 15, 'Fitness Workout Plan', 'Create a one-week fitness workout plan that includes warm-up, main workout, and cool-down. Include exercises for cardiovascular endurance, muscular strength, and flexibility. Explain the benefits of each exercise and how to perform them safely.', '2026-09-01 04:51:33', 40.00, '2026-08-28 04:51:33'),
+(16, 24, 'Accounting Cycle Exercise', 'Complete the accounting cycle exercises provided. Include journal entries, posting to ledgers, trial balance preparation, adjusting entries, worksheet creation, financial statements (income statement, balance sheet), and closing entries. Use the given business transactions.', '2026-09-06 04:51:33', 100.00, '2026-08-28 04:51:33'),
+(17, 24, 'Business Ethics Case Study', 'Analyze a real or hypothetical business ethics scenario. Identify the ethical dilemma, stakeholders involved, and potential solutions. Apply the Utilitarian, Deontological, and Virtue ethics frameworks to analyze the situation. Write a 400-word report with recommendations.', '2026-09-13 04:51:33', 85.00, '2026-08-28 04:51:33'),
+(18, 25, 'Business Math Problem Set', 'Solve the 25 business math problems involving markups, markdowns, discounts, and commissions. Show your complete solutions and identify the formulas used for each problem type. Also, create 5 original word problems based on real business scenarios.', '2026-09-03 04:51:33', 75.00, '2026-08-28 04:51:33'),
+(19, 26, 'Organizational Structure Analysis', 'Research and analyze the organizational structure of a company of your choice. Identify the type of organizational structure, the chain of command, span of control, and the advantages/disadvantages of this structure. Create an organizational chart and write a 300-word analysis.', '2026-09-10 04:51:33', 65.00, '2026-08-28 04:51:33'),
+(20, 26, 'Leadership Style Assessment', 'Take a leadership style assessment (provide a link or description). Based on your results, write a 300-word reflection on your leadership style, its strengths and weaknesses, and how you can develop your leadership skills. Include examples of when you exhibited leadership.', '2026-09-16 04:51:33', 55.00, '2026-08-28 04:51:33');
+
 -- --------------------------------------------------------
 
 --
@@ -377,7 +403,7 @@ CREATE TABLE `grading_templates` (
   `written_work_weight` decimal(4,2) NOT NULL,
   `performance_task_weight` decimal(4,2) NOT NULL,
   `exam_weight` decimal(4,2) NOT NULL
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -616,7 +642,57 @@ INSERT INTO `schedules` (`schedule_id`, `section_id`, `subject_id`, `teacher_id`
 (13, 5, 3, 1, 18, 'Monday', '12:00:00', '13:00:00', '2026-07-25 04:27:26'),
 (14, 5, 7, 1, 18, 'Monday', '13:00:00', '14:00:00', '2026-07-25 04:27:26'),
 (15, 5, 9, 1, 18, 'Monday', '14:00:00', '15:00:00', '2026-07-25 04:27:26'),
-(16, 5, 6, 4, 11, 'Thursday', '09:00:00', '10:00:00', '2026-07-25 04:29:10');
+(16, 5, 6, 4, 11, 'Thursday', '09:00:00', '10:00:00', '2026-07-25 04:29:10'),
+(17, 5, 3, 2, 1, 'Monday', '08:00:00', '09:00:00', '2026-08-28 04:49:53'),
+(18, 5, 4, 4, 2, 'Monday', '09:00:00', '10:00:00', '2026-08-28 04:49:53'),
+(19, 5, 5, 2, 3, 'Monday', '10:00:00', '11:00:00', '2026-08-28 04:49:53'),
+(20, 5, 6, 3, 4, 'Monday', '11:00:00', '12:00:00', '2026-08-28 04:49:53'),
+(21, 5, 7, 1, 5, 'Monday', '13:00:00', '14:00:00', '2026-08-28 04:49:53'),
+(22, 5, 8, 1, 6, 'Monday', '14:00:00', '15:00:00', '2026-08-28 04:49:53'),
+(23, 5, 9, 4, 7, 'Monday', '15:00:00', '16:00:00', '2026-08-28 04:49:53'),
+(24, 5, 35, 1, 8, 'Tuesday', '08:00:00', '09:00:00', '2026-08-28 04:49:53'),
+(25, 5, 36, 2, 9, 'Tuesday', '09:00:00', '10:00:00', '2026-08-28 04:49:53'),
+(26, 5, 37, 4, 10, 'Tuesday', '10:00:00', '11:00:00', '2026-08-28 04:49:53'),
+(27, 5, 3, 2, 1, 'Monday', '08:00:00', '09:00:00', '2026-08-28 04:50:12'),
+(28, 5, 4, 4, 2, 'Monday', '09:00:00', '10:00:00', '2026-08-28 04:50:12'),
+(29, 5, 5, 2, 3, 'Monday', '10:00:00', '11:00:00', '2026-08-28 04:50:12'),
+(30, 5, 6, 3, 4, 'Monday', '11:00:00', '12:00:00', '2026-08-28 04:50:12'),
+(31, 5, 7, 1, 5, 'Monday', '13:00:00', '14:00:00', '2026-08-28 04:50:12'),
+(32, 5, 8, 1, 6, 'Monday', '14:00:00', '15:00:00', '2026-08-28 04:50:12'),
+(33, 5, 9, 4, 7, 'Monday', '15:00:00', '16:00:00', '2026-08-28 04:50:12'),
+(34, 5, 35, 1, 8, 'Tuesday', '08:00:00', '09:00:00', '2026-08-28 04:50:12'),
+(35, 5, 36, 2, 9, 'Tuesday', '09:00:00', '10:00:00', '2026-08-28 04:50:12'),
+(36, 5, 37, 4, 10, 'Tuesday', '10:00:00', '11:00:00', '2026-08-28 04:50:12');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `schedule_events`
+--
+
+CREATE TABLE `schedule_events` (
+  `event_id` int(11) NOT NULL,
+  `created_by_role` enum('Student','Teacher') NOT NULL,
+  `created_by_id` int(11) NOT NULL,
+  `section_id` int(11) DEFAULT NULL,
+  `subject_id` int(11) DEFAULT NULL,
+  `title` varchar(150) NOT NULL,
+  `description` text DEFAULT NULL,
+  `event_type` enum('Personal','Quiz','Review','Announcement') NOT NULL DEFAULT 'Personal',
+  `start_datetime` datetime NOT NULL,
+  `end_datetime` datetime NOT NULL,
+  `status` enum('Scheduled','Cancelled','Done') NOT NULL DEFAULT 'Scheduled',
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `schedule_events`
+--
+
+INSERT INTO `schedule_events` (`event_id`, `created_by_role`, `created_by_id`, `section_id`, `subject_id`, `title`, `description`, `event_type`, `start_datetime`, `end_datetime`, `status`, `created_at`) VALUES
+(2, 'Teacher', 1, NULL, 15, 'asd', NULL, 'Quiz', '2026-03-15 09:00:00', '2026-03-15 10:00:00', 'Scheduled', '2026-08-28 05:16:52'),
+(3, 'Student', 1, NULL, 15, 'ww', NULL, 'Personal', '2026-09-09 09:00:00', '2026-09-09 10:00:00', 'Scheduled', '2026-08-28 05:17:33'),
+(4, 'Student', 1, NULL, 15, 'asd', NULL, 'Personal', '2026-09-01 09:00:00', '2026-09-01 10:00:00', 'Scheduled', '2026-08-28 05:17:57');
 
 -- --------------------------------------------------------
 
@@ -697,6 +773,7 @@ CREATE TABLE `students` (
   `gender` enum('Male','Female','Other') NOT NULL,
   `birthdate` date NOT NULL,
   `address` varchar(255) NOT NULL,
+  `bio` varchar(500) DEFAULT NULL,
   `contact_number` varchar(20) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `grade_level` enum('11','12') NOT NULL,
@@ -716,29 +793,73 @@ CREATE TABLE `students` (
   `emergency_contact_number` varchar(20) NOT NULL,
   `archive_reason` varchar(255) DEFAULT NULL,
   `archived_at` datetime DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`student_id`, `user_id`, `lrn`, `student_number`, `first_name`, `last_name`, `middle_name`, `gender`, `birthdate`, `address`, `contact_number`, `email`, `grade_level`, `status`, `father_name`, `father_contact_number`, `father_occupation`, `mother_name`, `mother_contact_number`, `mother_occupation`, `guardian_name`, `guardian_relationship`, `guardian_contact_number`, `guardian_address`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_number`, `archive_reason`, `archived_at`, `created_at`) VALUES
-(1, NULL, '123456789012', '2026-0001', 'saddasadsdasdasdas', 'Dela Cruz', 'Santos', 'Male', '2009-03-15', '123 Rizal St., Brgy. San Antonio, Dasmariñas, Cavite', '09171234501', 'juan.delacruz@example.com', '11', 'Inactive', 'Pedro Dela Cruz', '09171234502', 'Driver', 'Maria Dela Cruz', '09171234503', 'Vendor', '', '', '', '', 'Maria Dela Cruz', 'Mother', '09171234503', 'Transferred Out', '2026-07-08 17:23:05', '2026-07-04 03:38:34'),
-(2, NULL, '123456789013', '2026-0002', 'Andrea', 'Santos', 'Reyes', 'Female', '2008-11-02', '45 Mabini Ave., Brgy. Zone 2, Dasmariñas, Cavite', '09171234504', 'andrea.santos@example.com', '12', 'Active', 'Roberto Santos', '09171234505', 'Engineer', 'Liza Santos', '09171234506', 'Teacher', NULL, NULL, NULL, NULL, 'Roberto Santos', 'Father', '09171234505', NULL, NULL, '2026-07-04 03:38:34'),
-(3, NULL, '123456789014', '2026-0003', 'Miguel', 'Ramos', NULL, 'Male', '2009-06-21', '78 Aguinaldo Hwy., Brgy. Salawag, Dasmariñas, Cavite', '09171234507', 'miguel.ramos@example.com', '11', 'Active', NULL, NULL, NULL, 'Carmela Ramos', '09171234508', 'Nurse', 'Carmela Ramos', 'Mother', '09171234508', '78 Aguinaldo Hwy., Brgy. Salawag, Dasmariñas, Cavite', 'Carmela Ramos', 'Mother', '09171234508', NULL, NULL, '2026-07-04 03:38:34'),
-(4, NULL, '123456789015', '2026-0004', 'Bianca', 'Torres', 'Mendoza', 'Female', '2008-09-09', '12 Molino Rd., Brgy. Molino III, Bacoor, Cavite', '09171234509', 'bianca.torres@example.com', '12', 'Active', 'Antonio Torres', '09171234510', 'Businessman', 'Grace Torres', '09171234511', 'Accountant', NULL, NULL, NULL, NULL, 'Grace Torres', 'Mother', '09171234511', NULL, NULL, '2026-07-04 03:38:34'),
-(5, NULL, '123456789016', '2026-0005', 'Josh', 'Villanueva', 'Cruz', 'Male', '2009-01-30', '89 Governor\'s Dr., Brgy. Malagasang, Imus, Cavite', '09171234512', 'josh.villanueva@example.com', '11', 'Active', 'Nestor Villanueva', '09171234513', 'OFW', 'Rosario Villanueva', '09171234514', 'Housewife', 'Elena Cruz', 'Aunt', '09171234515', '90 Governor\'s Dr., Brgy. Malagasang, Imus, Cavite', 'Rosario Villanueva', 'Mother', '09171234514', NULL, NULL, '2026-07-04 03:38:34'),
-(6, NULL, 'Non error al', '762', 'Whoopi', 'Villarreal', 'Arden Stephenson', 'Female', '2011-05-08', 'Cillum nobis do veli', '+1 (517) 876-6398', 'malelimaq@mailinator.com', '12', 'Active', 'Leroy Newton', '+1 (585) 175-3873', 'Et vero impedit fac', 'Clinton Ferguson', '+1 (686) 408-8277', 'Repudiandae necessit', 'Alexander Jones', 'Nihil commodo id nem', '+1 (986) 374-5567', 'Amet officia quae i', 'Stella Frazier', 'Explicabo Facere er', '+1 (339) 397-6779', NULL, NULL, '2026-07-04 04:06:34'),
-(7, NULL, 'Maiores dolo', '590', 'Merrill', 'Dotson', 'Nerea Holder', 'Female', '2024-08-30', 'Debitis doloremque q', '+1 (444) 222-8575', 'nofupe@mailinator.com', '11', 'Inactive', 'Yael Quinn', '+1 (645) 754-3951', 'In asperiores beatae', 'Xaviera Stout', '+1 (818) 853-1765', 'Amet officiis illum', 'Caleb Rivas', 'Adipisci ut aspernat', '+1 (275) 194-1103', 'Id accusantium neque', 'Winter Houston', 'Nostrud dolor qui et', '+1 (907) 754-4473', 'Transferred Out', '2026-07-08 17:23:07', '2026-07-04 04:06:53'),
-(8, NULL, '211222222222', '2026-8485', 'Christine', 'Farley', 'Britanney Conner', 'Female', '1994-03-15', 'Irure dolore ullamco', '09999999999', 'jesihebec@mailinator.com', '11', 'Active', 'Nigel Rodriquez', '09999999999', NULL, 'Idona Sharpe', '09999999999', NULL, 'Alden Branch', 'Minima minim tenetur', '09999999999', NULL, 'Daniel Lewis', 'Magnam mollit ea mol', '09999999999', NULL, NULL, '2026-07-17 02:55:57'),
-(9, NULL, '888888888888', '2026-2198', 'Dillon', 'Sampson', 'Denton Wilkerson', 'Female', '2013-09-22', 'Exercitationem disti', '09999999999', 'senylahoni@mailinator.com', '12', 'Active', 'Iona Stout', '09999999999', NULL, 'Hiroko Mays', '09999999999', NULL, 'Caldwell Chen', 'Distinctio Voluptas', '09999999999', NULL, 'Yeo Pearson', 'Quo doloribus sapien', '09999999999', NULL, NULL, '2026-07-18 01:15:58'),
-(10, NULL, '122222222222', '2026-4246', 'Sybil', 'Delaney', 'Riley Brennan', 'Male', '1982-01-03', 'Occaecat nihil molli', '09999999999', 'kristanalmario@gmail.com', '11', 'Active', 'Kevin Waller', '09999999999', NULL, 'Suki Ball', '09999999999', NULL, 'Salvador Rivas', 'Ad ut aut dolore ten0', '09999999999', NULL, 'Charde Ayers', 'Vitae tempora tempor', '09999999999', NULL, NULL, '2026-07-18 01:18:38'),
-(12, NULL, '875554564645', '2026-4161', 'Almario', 'Kristan', 'Stacy Garcia', 'Male', '1995-12-31', 'Anim qui rerum bland', '09999999999', 'pawatytil@mailinator.com', '11', 'Active', 'Alexa Vega', '09099999999', NULL, 'Kenyon Franks', '09999999999', NULL, 'Olivia Henry', 'Aut id est maiores a', '09999999999', NULL, 'Leigh Pierce', 'Aliquid praesentium', '09999999999', NULL, NULL, '2026-07-18 03:10:18'),
-(13, NULL, '099999999999', '2026-1571', 'Evelyn', 'Wolf', 'Olivia Roach', 'Female', '1984-11-18', 'Sed et aperiam venia', '09999999999', 'hofako@mailinator.com', '12', 'Active', 'Rana Davidson', '09999999999', NULL, 'Heidi Perry', '09999999999', NULL, 'Alfonso Steele', 'Incididunt dolore pr', '09999999999', NULL, 'Tanner Benson', 'Nulla laboriosam al', '09999999999', NULL, NULL, '2026-07-23 16:54:39'),
-(14, NULL, 'Sit volupta', '2026-1482', 'Dale', 'Levy', 'Cade Pearson', 'Female', '2000-02-23', 'Nihil aut dolor veli', '+1 (835) 456-5407', 'heca@mailinator.com', '12', 'Active', 'Jeanette Salas', '+1 (603) 695-6086', 'Est dolor dolorem a', 'Finn Shelton', '+1 (443) 905-5086', 'Accusamus laborum ac', 'Quinn Gross', 'Tempor eiusmod neces', '+1 (281) 983-1216', 'Consequatur ullamco', 'Keely Mitchell', 'Aut voluptatem Erro', '+1 (281) 721-8968', NULL, NULL, '2026-07-25 04:59:07'),
-(21, NULL, '123333333333', '2026-5342', 'Alfreda', 'Flores', 'Dante Hickman', 'Male', '2008-08-17', 'Voluptatem ut quibu', '+1 (839) 494-9679', 'kutyrydyn@mailinator.com', '12', 'Active', 'Colby Walls', '+1 (468) 313-9195', 'Dolore minima aliqua', 'Kennan Wiley', '+1 (796) 379-9269', 'Beatae consectetur c', 'Candace Campos', 'Irure rerum eveniet', '+1 (426) 508-2245', 'Officiis sequi labor', 'Dorian Martin', 'Aliquip enim consect', '+1 (767) 212-8795', NULL, NULL, '2026-07-25 05:05:29'),
-(22, NULL, '909090909090', '2026-1410', 'Kareem', 'Parrish', 'Velma Hays', 'Female', '2018-08-15', 'Et esse magna corpor', '+1 (998) 128-1487', 'ladivyxuce@mailinator.com', '12', 'Active', 'Camille Moore', '+1 (812) 724-6888', 'Exercitation eu sint', 'Edward Richards', '+1 (495) 833-2522', 'Reiciendis est nobis', 'Yael Decker', 'Incididunt laborum ', '+1 (559) 521-6148', 'Tempor alias maxime ', 'Whitney Hubbard', 'Minus eius doloribus', '+1 (571) 563-5622', NULL, NULL, '2026-07-25 05:05:46');
+INSERT INTO `students` (`student_id`, `user_id`, `lrn`, `student_number`, `first_name`, `last_name`, `middle_name`, `gender`, `birthdate`, `address`, `bio`, `contact_number`, `email`, `grade_level`, `status`, `father_name`, `father_contact_number`, `father_occupation`, `mother_name`, `mother_contact_number`, `mother_occupation`, `guardian_name`, `guardian_relationship`, `guardian_contact_number`, `guardian_address`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_number`, `archive_reason`, `archived_at`, `created_at`, `updated_at`) VALUES
+(1, NULL, '123456789012', '2026-0001', 'saddasadsdasdasdas', 'Dela Cruz', 'Santos', 'Male', '2009-03-15', '123 Rizal St., Brgy. San Antonio, Dasmariñas, Cavite', NULL, '09171234501', 'juan.delacruz@example.com', '11', 'Inactive', 'Pedro Dela Cruz', '09171234502', 'Driver', 'Maria Dela Cruz', '09171234503', 'Vendor', '', '', '', '', 'Maria Dela Cruz', 'Mother', '09171234503', 'Transferred Out', '2026-07-08 17:23:05', '2026-07-04 03:38:34', NULL),
+(2, NULL, '123456789013', '2026-0002', 'Andrea', 'Santos', 'Reyes', 'Female', '2008-11-02', '45 Mabini Ave., Brgy. Zone 2, Dasmariñas, Cavite', NULL, '09171234504', 'andrea.santos@example.com', '12', 'Active', 'Roberto Santos', '09171234505', 'Engineer', 'Liza Santos', '09171234506', 'Teacher', NULL, NULL, NULL, NULL, 'Roberto Santos', 'Father', '09171234505', NULL, NULL, '2026-07-04 03:38:34', NULL),
+(3, NULL, '123456789014', '2026-0003', 'Miguel', 'Ramos', NULL, 'Male', '2009-06-21', '78 Aguinaldo Hwy., Brgy. Salawag, Dasmariñas, Cavite', NULL, '09171234507', 'miguel.ramos@example.com', '11', 'Active', NULL, NULL, NULL, 'Carmela Ramos', '09171234508', 'Nurse', 'Carmela Ramos', 'Mother', '09171234508', '78 Aguinaldo Hwy., Brgy. Salawag, Dasmariñas, Cavite', 'Carmela Ramos', 'Mother', '09171234508', NULL, NULL, '2026-07-04 03:38:34', NULL),
+(4, NULL, '123456789015', '2026-0004', 'Bianca', 'Torres', 'Mendoza', 'Female', '2008-09-09', '12 Molino Rd., Brgy. Molino III, Bacoor, Cavite', NULL, '09171234509', 'bianca.torres@example.com', '12', 'Active', 'Antonio Torres', '09171234510', 'Businessman', 'Grace Torres', '09171234511', 'Accountant', NULL, NULL, NULL, NULL, 'Grace Torres', 'Mother', '09171234511', NULL, NULL, '2026-07-04 03:38:34', NULL),
+(5, NULL, '123456789016', '2026-0005', 'Josh', 'Villanueva', 'Cruz', 'Male', '2009-01-30', '89 Governor\'s Dr., Brgy. Malagasang, Imus, Cavite', NULL, '09171234512', 'josh.villanueva@example.com', '11', 'Active', 'Nestor Villanueva', '09171234513', 'OFW', 'Rosario Villanueva', '09171234514', 'Housewife', 'Elena Cruz', 'Aunt', '09171234515', '90 Governor\'s Dr., Brgy. Malagasang, Imus, Cavite', 'Rosario Villanueva', 'Mother', '09171234514', NULL, NULL, '2026-07-04 03:38:34', NULL),
+(6, NULL, 'Non error al', '762', 'Whoopi', 'Villarreal', 'Arden Stephenson', 'Female', '2011-05-08', 'Cillum nobis do veli', NULL, '+1 (517) 876-6398', 'malelimaq@mailinator.com', '12', 'Active', 'Leroy Newton', '+1 (585) 175-3873', 'Et vero impedit fac', 'Clinton Ferguson', '+1 (686) 408-8277', 'Repudiandae necessit', 'Alexander Jones', 'Nihil commodo id nem', '+1 (986) 374-5567', 'Amet officia quae i', 'Stella Frazier', 'Explicabo Facere er', '+1 (339) 397-6779', NULL, NULL, '2026-07-04 04:06:34', NULL),
+(7, NULL, 'Maiores dolo', '590', 'Merrill', 'Dotson', 'Nerea Holder', 'Female', '2024-08-30', 'Debitis doloremque q', NULL, '+1 (444) 222-8575', 'nofupe@mailinator.com', '11', 'Inactive', 'Yael Quinn', '+1 (645) 754-3951', 'In asperiores beatae', 'Xaviera Stout', '+1 (818) 853-1765', 'Amet officiis illum', 'Caleb Rivas', 'Adipisci ut aspernat', '+1 (275) 194-1103', 'Id accusantium neque', 'Winter Houston', 'Nostrud dolor qui et', '+1 (907) 754-4473', 'Transferred Out', '2026-07-08 17:23:07', '2026-07-04 04:06:53', NULL),
+(8, NULL, '211222222222', '2026-8485', 'Christine', 'Farley', 'Britanney Conner', 'Female', '1994-03-15', 'Irure dolore ullamco', NULL, '09999999999', 'jesihebec@mailinator.com', '11', 'Active', 'Nigel Rodriquez', '09999999999', NULL, 'Idona Sharpe', '09999999999', NULL, 'Alden Branch', 'Minima minim tenetur', '09999999999', NULL, 'Daniel Lewis', 'Magnam mollit ea mol', '09999999999', NULL, NULL, '2026-07-17 02:55:57', NULL),
+(9, NULL, '888888888888', '2026-2198', 'Dillon', 'Sampson', 'Denton Wilkerson', 'Female', '2013-09-22', 'Exercitationem disti', NULL, '09999999999', 'senylahoni@mailinator.com', '12', 'Active', 'Iona Stout', '09999999999', NULL, 'Hiroko Mays', '09999999999', NULL, 'Caldwell Chen', 'Distinctio Voluptas', '09999999999', NULL, 'Yeo Pearson', 'Quo doloribus sapien', '09999999999', NULL, NULL, '2026-07-18 01:15:58', NULL),
+(10, NULL, '122222222222', '2026-4246', 'Sybil', 'Delaney', 'Riley Brennan', 'Male', '1982-01-03', 'Occaecat nihil molli', NULL, '09999999999', 'kristanalmario@gmail.com', '11', 'Active', 'Kevin Waller', '09999999999', NULL, 'Suki Ball', '09999999999', NULL, 'Salvador Rivas', 'Ad ut aut dolore ten0', '09999999999', NULL, 'Charde Ayers', 'Vitae tempora tempor', '09999999999', NULL, NULL, '2026-07-18 01:18:38', NULL),
+(12, NULL, '875554564645', '2026-4161', 'Almario', 'Kristan', 'Stacy Garcia', 'Male', '1995-12-31', 'Anim qui rerum bland', NULL, '09999999999', 'pawatytil@mailinator.com', '11', 'Active', 'Alexa Vega', '09099999999', NULL, 'Kenyon Franks', '09999999999', NULL, 'Olivia Henry', 'Aut id est maiores a', '09999999999', NULL, 'Leigh Pierce', 'Aliquid praesentium', '09999999999', NULL, NULL, '2026-07-18 03:10:18', NULL),
+(13, NULL, '099999999999', '2026-1571', 'Evelyn', 'Wolf', 'Olivia Roach', 'Female', '1984-11-18', 'Sed et aperiam venia', NULL, '09999999999', 'hofako@mailinator.com', '12', 'Active', 'Rana Davidson', '09999999999', NULL, 'Heidi Perry', '09999999999', NULL, 'Alfonso Steele', 'Incididunt dolore pr', '09999999999', NULL, 'Tanner Benson', 'Nulla laboriosam al', '09999999999', NULL, NULL, '2026-07-23 16:54:39', NULL),
+(14, NULL, 'Sit volupta', '2026-1482', 'Dale', 'Levy', 'Cade Pearson', 'Female', '2000-02-23', 'Nihil aut dolor veli', NULL, '+1 (835) 456-5407', 'heca@mailinator.com', '12', 'Active', 'Jeanette Salas', '+1 (603) 695-6086', 'Est dolor dolorem a', 'Finn Shelton', '+1 (443) 905-5086', 'Accusamus laborum ac', 'Quinn Gross', 'Tempor eiusmod neces', '+1 (281) 983-1216', 'Consequatur ullamco', 'Keely Mitchell', 'Aut voluptatem Erro', '+1 (281) 721-8968', NULL, NULL, '2026-07-25 04:59:07', NULL),
+(21, NULL, '123333333333', '2026-5342', 'Alfreda', 'Flores', 'Dante Hickman', 'Male', '2008-08-17', 'Voluptatem ut quibu', NULL, '+1 (839) 494-9679', 'kutyrydyn@mailinator.com', '12', 'Active', 'Colby Walls', '+1 (468) 313-9195', 'Dolore minima aliqua', 'Kennan Wiley', '+1 (796) 379-9269', 'Beatae consectetur c', 'Candace Campos', 'Irure rerum eveniet', '+1 (426) 508-2245', 'Officiis sequi labor', 'Dorian Martin', 'Aliquip enim consect', '+1 (767) 212-8795', NULL, NULL, '2026-07-25 05:05:29', NULL),
+(22, NULL, '909090909090', '2026-1410', 'Kareem', 'Parrish', 'Velma Hays', 'Female', '2018-08-15', 'Et esse magna corpor', NULL, '+1 (998) 128-1487', 'ladivyxuce@mailinator.com', '12', 'Active', 'Camille Moore', '+1 (812) 724-6888', 'Exercitation eu sint', 'Edward Richards', '+1 (495) 833-2522', 'Reiciendis est nobis', 'Yael Decker', 'Incididunt laborum ', '+1 (559) 521-6148', 'Tempor alias maxime ', 'Whitney Hubbard', 'Minus eius doloribus', '+1 (571) 563-5622', NULL, NULL, '2026-07-25 05:05:46', NULL),
+(23, NULL, 'PENDA89C0603', '2026-27572', 'Hammett', 'Crawford', 'Kirby Fletcher', 'Other', '2013-03-12', 'Quia id alias conseq', NULL, '0946 1646 954', 'zojece@mailinator.com', '11', 'Active', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '(To be updated)', '(To be updated)', '(To be updated)', NULL, NULL, '2026-08-28 04:22:21', NULL),
+(24, NULL, 'PEND4AB61875', '2026-97374', 'Destiny', 'Reed', 'Holly Mitchell', 'Female', '2002-08-08', 'Cum delectus odio p', NULL, '0954 4554 142', 'kcpogi09@gmail.com', '11', 'Active', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '(To be updated)', '(To be updated)', '(To be updated)', NULL, NULL, '2026-08-28 04:23:36', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_account`
+--
+
+CREATE TABLE `student_account` (
+  `student_id` int(11) NOT NULL COMMENT 'PK + 1:1 with students.student_id',
+  `user_id` int(11) DEFAULT NULL COMMENT 'optional back-link to users.user_id',
+  `username` varchar(50) NOT NULL COMMENT 'login id, separate from student_number / LRN / email',
+  `password_hash` varchar(255) NOT NULL COMMENT 'bcrypt / argon2 hash; never store plaintext',
+  `recovery_email` varchar(100) DEFAULT NULL COMMENT 'used for password-reset if personal email is inaccessible',
+  `status` enum('Active','Inactive','Locked','Suspended','Pending Verification') NOT NULL DEFAULT 'Pending Verification',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'soft-disable without deleting the row',
+  `must_change_password` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'forces a reset on first login',
+  `password_changed_at` datetime DEFAULT NULL,
+  `failed_login_count` int(11) NOT NULL DEFAULT 0,
+  `locked_until` datetime DEFAULT NULL COMMENT 'temporary lockout after too many failed attempts',
+  `last_login_at` datetime DEFAULT NULL,
+  `last_login_ip` varchar(45) DEFAULT NULL COMMENT 'IPv4 or IPv6',
+  `email_verified_at` datetime DEFAULT NULL,
+  `email_verification_token` varchar(100) DEFAULT NULL,
+  `password_reset_token` varchar(100) DEFAULT NULL,
+  `password_reset_expires_at` datetime DEFAULT NULL,
+  `two_factor_enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `two_factor_secret` varchar(255) DEFAULT NULL COMMENT 'encrypted TOTP secret, null when 2FA is off',
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL COMMENT 'users.user_id of the staff/registrar who created the account',
+  `updated_by` int(11) DEFAULT NULL COMMENT 'users.user_id of the last staff/admin who updated it',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `student_account`
+--
+
+INSERT INTO `student_account` (`student_id`, `user_id`, `username`, `password_hash`, `recovery_email`, `status`, `is_active`, `must_change_password`, `password_changed_at`, `failed_login_count`, `locked_until`, `last_login_at`, `last_login_ip`, `email_verified_at`, `email_verification_token`, `password_reset_token`, `password_reset_expires_at`, `two_factor_enabled`, `two_factor_secret`, `remember_token`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(23, NULL, 'gynulesos', '$2y$10$xZcXCUeFlVOZmVlSPgAGwu/DoDfqbBzu2J7DqBka9KNg1BMWz6bD.', 'zojece@mailinator.com', 'Active', 1, 0, '2026-08-27 22:22:21', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-08-28 04:22:21', '2026-08-28 04:22:21'),
+(24, NULL, 'vidogikel', '$2y$10$1/qGlQIFDJ2D5wjdbUpuM.dRvzuycGCxfTBSeiHxeiW217yPfylu2', 'kcpogi09@gmail.com', 'Active', 1, 0, '2026-08-27 22:23:36', 0, NULL, '2026-08-28 04:24:03', '::1', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-08-28 04:23:36', '2026-08-28 04:24:03');
 
 -- --------------------------------------------------------
 
@@ -864,6 +985,23 @@ CREATE TABLE `submissions` (
   `score` decimal(6,2) DEFAULT NULL,
   `status` enum('Pending','Submitted','Late','Graded') NOT NULL DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `submissions`
+--
+
+INSERT INTO `submissions` (`submission_id`, `assignment_id`, `student_id`, `submitted_at`, `file_url`, `score`, `status`) VALUES
+(1, 1, 10, '2026-08-25 04:52:15', '/uploads/submissions/speech_sybil_delaney.mp4', 85.50, 'Graded'),
+(2, 4, 10, '2026-08-27 04:52:15', '/uploads/submissions/functions_worksheet_sybil.pdf', 42.00, 'Graded'),
+(3, 10, 10, '2026-08-26 04:52:15', '/uploads/submissions/reflection_sybil_delaney.pdf', NULL, 'Submitted'),
+(4, 7, 12, '2026-08-25 04:52:28', '/uploads/submissions/cell_report_kristan.pdf', 72.00, 'Graded'),
+(5, 13, 12, '2026-08-27 04:52:28', '/uploads/submissions/philosophy_reflection_kristan.pdf', 45.00, 'Graded'),
+(6, 16, 12, '2026-08-29 04:52:28', '/uploads/submissions/accounting_cycle_kristan.pdf', NULL, 'Late'),
+(7, 18, 12, '2026-08-28 04:52:28', '/uploads/submissions/business_math_kristan.pdf', NULL, 'Submitted'),
+(8, 1, 13, '2026-08-24 04:52:28', '/uploads/submissions/speech_evelyn_wolf.mp4', 92.00, 'Graded'),
+(9, 4, 13, '2026-08-26 04:52:28', '/uploads/submissions/functions_evelyn_wolf.pdf', 48.00, 'Graded'),
+(10, 11, 13, '2026-08-27 04:52:28', '/uploads/submissions/life_goals_evelyn_wolf.pdf', NULL, 'Submitted'),
+(11, 19, 13, '2026-08-26 04:52:28', '/uploads/submissions/org_structure_evelyn_wolf.pdf', NULL, 'Submitted');
 
 -- --------------------------------------------------------
 
@@ -1155,6 +1293,12 @@ ALTER TABLE `schedules`
   ADD KEY `room_id` (`room_id`);
 
 --
+-- Indexes for table `schedule_events`
+--
+ALTER TABLE `schedule_events`
+  ADD PRIMARY KEY (`event_id`);
+
+--
 -- Indexes for table `school_years`
 --
 ALTER TABLE `school_years`
@@ -1185,6 +1329,20 @@ ALTER TABLE `students`
   ADD UNIQUE KEY `student_number` (`student_number`),
   ADD UNIQUE KEY `email` (`email`),
   ADD UNIQUE KEY `uq_students_user_id` (`user_id`);
+
+--
+-- Indexes for table `student_account`
+--
+ALTER TABLE `student_account`
+  ADD PRIMARY KEY (`student_id`),
+  ADD UNIQUE KEY `uq_student_account_username` (`username`),
+  ADD UNIQUE KEY `uq_student_account_user_id` (`user_id`),
+  ADD UNIQUE KEY `uq_student_account_reset_token` (`password_reset_token`),
+  ADD UNIQUE KEY `uq_student_account_verify_token` (`email_verification_token`),
+  ADD KEY `idx_student_account_status` (`status`,`is_active`),
+  ADD KEY `idx_student_account_recovery_email` (`recovery_email`),
+  ADD KEY `fk_student_account_created_by` (`created_by`),
+  ADD KEY `fk_student_account_updated_by` (`updated_by`);
 
 --
 -- Indexes for table `student_guardians`
@@ -1279,7 +1437,7 @@ ALTER TABLE `applicant_documents`
 -- AUTO_INCREMENT for table `assignments`
 --
 ALTER TABLE `assignments`
-  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `assignment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `attendance_records`
@@ -1399,7 +1557,13 @@ ALTER TABLE `rooms`
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+
+--
+-- AUTO_INCREMENT for table `schedule_events`
+--
+ALTER TABLE `schedule_events`
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `school_years`
@@ -1423,7 +1587,7 @@ ALTER TABLE `strands`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `student_guardians`
@@ -1447,7 +1611,7 @@ ALTER TABLE `subject_grading_templates`
 -- AUTO_INCREMENT for table `submissions`
 --
 ALTER TABLE `submissions`
-  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `teachers`
@@ -1626,6 +1790,15 @@ ALTER TABLE `strands`
 --
 ALTER TABLE `students`
   ADD CONSTRAINT `fk_students_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `student_account`
+--
+ALTER TABLE `student_account`
+  ADD CONSTRAINT `fk_student_account_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_student_account_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_student_account_updated_by` FOREIGN KEY (`updated_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_student_account_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `student_guardians`

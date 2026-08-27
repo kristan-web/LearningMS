@@ -1,0 +1,122 @@
+[
+  {
+    "subject_id": 3,
+    "strand_id": null,
+    "subject_code": "ORALCOM",
+    "subject_name": "Oral Communication",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Develops effective oral communication skills in various contexts.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 4,
+    "strand_id": null,
+    "subject_code": "KOMPAN",
+    "subject_name": "Komunikasyon at Pananaliksik sa Wika at Kulturang Pilipino",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Kasanayan sa komunikasyon at pananaliksik gamit ang wikang Filipino.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 5,
+    "strand_id": null,
+    "subject_code": "GENMATH",
+    "subject_name": "General Mathematics",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Covers functions, business math, and logic.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 6,
+    "strand_id": null,
+    "subject_code": "EARTHLIFE",
+    "subject_name": "Earth and Life Science",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Introductory earth science and biology concepts.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 7,
+    "strand_id": null,
+    "subject_code": "PERSDEV",
+    "subject_name": "Personal Development",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Self-awareness and personal growth topics.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 8,
+    "strand_id": null,
+    "subject_code": "PHILO",
+    "subject_name": "Introduction to the Philosophy of the Human Person",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Philosophical reflection on the human condition.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 9,
+    "strand_id": null,
+    "subject_code": "PE1",
+    "subject_name": "Physical Education and Health 1",
+    "subject_type": "Core",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Physical fitness and health education.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 35,
+    "strand_id": 2,
+    "subject_code": "ABM1",
+    "subject_name": "Fundamentals of Accountancy, Business and Management 1",
+    "subject_type": "Specialized",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Basic accounting principles and the accounting cycle.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 36,
+    "strand_id": 2,
+    "subject_code": "BUSMATH",
+    "subject_name": "Business Mathematics",
+    "subject_type": "Specialized",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Mathematical tools for business decision-making.",
+    "status": "Active"
+  },
+  {
+    "subject_id": 37,
+    "strand_id": 2,
+    "subject_code": "ORGMAN",
+    "subject_name": "Organization and Management",
+    "subject_type": "Specialized",
+    "grade_level": "11",
+    "semester": "1st Semester",
+    "units": 1.0,
+    "description": "Principles of management and organizational behavior.",
+    "status": "Active"
+  }
+]

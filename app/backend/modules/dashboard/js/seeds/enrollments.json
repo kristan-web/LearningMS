@@ -1,0 +1,62 @@
+[
+  {
+    "enrollment_id": 8,
+    "student_id": 12,
+    "section_id": 5,
+    "school_year": "2026-2027",
+    "school_year_id": 1,
+    "semester": "1st Semester",
+    "date_enrolled": "2026-07-23 17:21:16",
+    "status": "Enrolled"
+  },
+  {
+    "enrollment_id": 9,
+    "student_id": 2,
+    "section_id": 7,
+    "school_year": "2026-2027",
+    "school_year_id": 1,
+    "semester": "1st Semester",
+    "date_enrolled": "2026-07-24 08:15:42",
+    "status": "Enrolled"
+  },
+  {
+    "enrollment_id": 10,
+    "student_id": 3,
+    "section_id": 1,
+    "school_year": "2026-2027",
+    "school_year_id": 1,
+    "semester": "1st Semester",
+    "date_enrolled": "2026-07-24 09:02:18",
+    "status": "Enrolled"
+  },
+  {
+    "enrollment_id": 11,
+    "student_id": 4,
+    "section_id": 11,
+    "school_year": "2026-2027",
+    "school_year_id": 1,
+    "semester": "1st Semester",
+    "date_enrolled": "2026-07-24 09:30:05",
+    "status": "Enrolled"
+  },
+  {
+    "enrollment_id": 12,
+    "student_id": 5,
+    "section_id": 13,
+    "school_year": "2026-2027",
+    "school_year_id": 1,
+    "semester": "1st Semester",
+    "date_enrolled": "2026-07-25 10:12:33",
+    "status": "Enrolled"
+  },
+  {
+    "enrollment_id": 13,
+    "student_id": 13,
+    "section_id": 7,
+    "school_year": "2026-2027",
+    "school_year_id": 1,
+    "semester": "1st Semester",
+    "date_enrolled": "2026-07-25 11:45:21",
+    "status": "Enrolled"
+  }
+]

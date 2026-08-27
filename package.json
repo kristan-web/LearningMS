@@ -1,0 +1,31 @@
+{
+  "name": "learningms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LearningMS schedule frontend assets",
+  "type": "commonjs",
+  "scripts": {
+    "build:css": "npx @tailwindcss/cli -i ./app/backend/modules/schedule/js/input.css -o ./app/backend/modules/schedule/js/output.css --config ./app/backend/modules/schedule/js/tailwind.config.js --minify",
+    "build:assets": "esbuild app/backend/modules/schedule/js/assets/app.js --bundle --minify --outfile=app/backend/modules/schedule/js/assets/app.bundle.js && esbuild app/backend/modules/schedule/js/assets/app.css --bundle --minify --outfile=app/backend/modules/schedule/js/assets/app.bundle.css",
+    "build": "npm run build:css && npm run build:assets",
+    "format": "prettier --plugin=@prettier/plugin-php --write --print-width 100 --single-attribute-per-line app/backend/modules/schedule/controller/ScheduleController.php app/backend/modules/schedule/DAO/ScheduleDAO.php app/backend/modules/schedule/model/Schedule.php app/views/schedule/index.php public/schedule.php app/backend/modules/schedule/js/assets/app.js app/backend/modules/schedule/js/assets/app.css app/backend/modules/schedule/js/input.css app/backend/modules/schedule/js/tailwind.config.js",
+    "format:check": "prettier --plugin=@prettier/plugin-php --check --print-width 100 --single-attribute-per-line app/backend/modules/schedule/controller/ScheduleController.php app/backend/modules/schedule/DAO/ScheduleDAO.php app/backend/modules/schedule/model/Schedule.php app/views/schedule/index.php public/schedule.php app/backend/modules/schedule/js/assets/app.js app/backend/modules/schedule/js/assets/app.css app/backend/modules/schedule/js/input.css app/backend/modules/schedule/js/tailwind.config.js"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.21",
+    "@fullcalendar/daygrid": "^6.1.21",
+    "@fullcalendar/interaction": "^6.1.21",
+    "@tailwindcss/cli": "^4.3.3",
+    "bootstrap": "^5.3.8",
+    "esbuild": "^0.28.2",
+    "react": "^17.0.2",
+    "react-alert": "^7.0.3",
+    "react-alert-template-basic": "^1.0.2",
+    "react-dom": "^17.0.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.25.0",
+    "prettier": "^3.9.6"
+  }
+}

@@ -24,11 +24,7 @@ function ServerAlerts() {
 const alertRoot = document.getElementById("react-alert-root");
 if (alertRoot) {
   ReactDOM.render(
-    React.createElement(
-      Provider,
-      { template: alertTemplate },
-      React.createElement(ServerAlerts),
-    ),
+    React.createElement(Provider, { template: alertTemplate }, React.createElement(ServerAlerts)),
     alertRoot,
   );
 }

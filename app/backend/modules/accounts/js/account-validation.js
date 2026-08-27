@@ -582,6 +582,48 @@
             } else if (reason === "pending_verification") {
                 markInvalid(identifierField.input, identifierField.err, "Please verify your email first.");
             }
+
+            // On a clean "ok" login we persist a small session blob so the
+            // next page (student-dashboard.php) can greet the user by their
+            // real first name. The dashboard already has a seed-driven
+            // fallback for users who reach it without logging in, so this
+            // is purely additive. We intentionally skip the redirect for
+            // must_change_password / pending_verification / inactive —
+            // those flows need the user to do something else first.
+            if (reason === "ok" && data && data.account) {
+                persistStudentSession(data.account);
+                window.location.assign("/LearningMS/public/student-dashboard.php");
+            }
+        }
+
+        // ---- Student session bridge --------------------------------------
+        // Save the bare minimum the dashboard needs to personalize the
+        // greeting: the student_id, the legal first name (preferred) and
+        // last name, and the username as a final fallback. We use
+        // sessionStorage so the data is scoped to the current tab and
+        // disappears when the browser is closed, which is appropriate
+        // for a placeholder client-side "session" until the back-end
+        // gets real session-cookie support.
+        function persistStudentSession(account) {
+            try {
+                const session = {
+                    student_id:  account.student_id || null,
+                    user_id:     account.user_id    || null,
+                    username:    account.username   || null,
+                    first_name:  account.first_name || null,
+                    middle_name: account.middle_name || null,
+                    last_name:   account.last_name  || null,
+                    saved_at:    new Date().toISOString()
+                };
+                window.sessionStorage.setItem(
+                    "lms.studentSession",
+                    JSON.stringify(session)
+                );
+            } catch (storageError) {
+                // sessionStorage may be unavailable (e.g. private mode on
+                // some browsers). The redirect still works; the dashboard
+                // simply falls back to its seed-driven greeting.
+            }
         }
 
         // Render a failed login response. We show the server's `errors` array

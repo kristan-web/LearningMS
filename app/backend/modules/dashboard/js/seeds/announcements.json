@@ -1,0 +1,58 @@
+[
+  {
+    "announcement_id": 1,
+    "posted_by": 1,
+    "section_id": null,
+    "title": "Welcome to S.Y. 2026-2027!",
+    "body": "Welcome back, students! Classes officially begin on August 15, 2026. Please check your schedules and prepare your modules accordingly.",
+    "posted_at": "2026-08-10 08:00:00"
+  },
+  {
+    "announcement_id": 2,
+    "posted_by": 1,
+    "section_id": null,
+    "title": "First Quarterly Examination Schedule",
+    "body": "The first quarterly examinations are scheduled from September 15-19, 2026. Please review your subjects accordingly. Examination permits will be released a week before the exam.",
+    "posted_at": "2026-08-18 10:30:00"
+  },
+  {
+    "announcement_id": 3,
+    "posted_by": 1,
+    "section_id": 5,
+    "title": "ABM 11-A: Class Meeting on Friday",
+    "body": "There will be a class meeting this Friday, August 29, 2026 at 3:00 PM in SHS-501 to discuss the upcoming business simulation activity.",
+    "posted_at": "2026-08-25 14:15:00"
+  },
+  {
+    "announcement_id": 4,
+    "posted_by": 1,
+    "section_id": null,
+    "title": "Library Hours Update",
+    "body": "The school library will now be open from 7:00 AM to 6:00 PM, Monday to Friday, and 8:00 AM to 4:00 PM on Saturdays.",
+    "posted_at": "2026-08-20 11:00:00"
+  },
+  {
+    "announcement_id": 5,
+    "posted_by": 1,
+    "section_id": null,
+    "title": "Guidance Office: Free Counseling Sessions",
+    "body": "The Guidance Office is now offering free counseling sessions every Wednesday and Friday afternoon. Walk-ins are welcome.",
+    "posted_at": "2026-08-22 13:45:00"
+  },
+  {
+    "announcement_id": 6,
+    "posted_by": 1,
+    "section_id": 5,
+    "title": "Reminder: Submit IDs",
+    "body": "All ABM 11-A students are reminded to submit their 2x2 ID photos to the homeroom adviser on or before August 30.",
+    "posted_at": "2026-08-24 09:00:00"
+  },
+  {
+    "announcement_id": 7,
+    "posted_by": 1,
+    "section_id": null,
+    "title": "Intramurals 2026",
+    "body": "The annual intramurals will be held from October 5-9, 2026. Start forming your teams and coordinate with the PE department.",
+    "posted_at": "2026-08-26 15:30:00"
+  }
+]

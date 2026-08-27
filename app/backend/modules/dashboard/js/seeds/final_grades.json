@@ -1,0 +1,102 @@
+[
+  {
+    "final_grade_id": 1,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 5,
+    "final_rating": 88.5,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 2,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 8,
+    "final_rating": 91.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 3,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 4,
+    "final_rating": 87.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 4,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 3,
+    "final_rating": 90.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 5,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 7,
+    "final_rating": 85.5,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 6,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 9,
+    "final_rating": 92.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 7,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 6,
+    "final_rating": 86.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 8,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 35,
+    "final_rating": 89.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 9,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 36,
+    "final_rating": 88.0,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  },
+  {
+    "final_grade_id": 10,
+    "enrollment_id": 8,
+    "student_id": 12,
+    "subject_id": 37,
+    "final_rating": 90.5,
+    "remarks": "Passed",
+    "is_locked": 0,
+    "computed_at": "2026-08-26 14:00:00"
+  }
+]

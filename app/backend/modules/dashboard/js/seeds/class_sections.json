@@ -1,0 +1,92 @@
+[
+  {
+    "section_id": 1,
+    "strand_id": 1,
+    "adviser_id": 1,
+    "grade_level": "11",
+    "section_name": "STEM 11-A",
+    "school_year": "2026-2027",
+    "max_slots": 40,
+    "status": "Open"
+  },
+  {
+    "section_id": 2,
+    "strand_id": 1,
+    "adviser_id": 1,
+    "grade_level": "11",
+    "section_name": "STEM 11-B",
+    "school_year": "2026-2027",
+    "max_slots": 40,
+    "status": "Open"
+  },
+  {
+    "section_id": 3,
+    "strand_id": 1,
+    "adviser_id": 1,
+    "grade_level": "12",
+    "section_name": "STEM 12-A",
+    "school_year": "2026-2027",
+    "max_slots": 40,
+    "status": "Open"
+  },
+  {
+    "section_id": 5,
+    "strand_id": 2,
+    "adviser_id": 1,
+    "grade_level": "11",
+    "section_name": "ABM 11-A",
+    "school_year": "2026-2027",
+    "max_slots": 42,
+    "status": "Open"
+  },
+  {
+    "section_id": 6,
+    "strand_id": 2,
+    "adviser_id": 1,
+    "grade_level": "11",
+    "section_name": "ABM 11-B",
+    "school_year": "2026-2027",
+    "max_slots": 42,
+    "status": "Open"
+  },
+  {
+    "section_id": 7,
+    "strand_id": 2,
+    "adviser_id": 1,
+    "grade_level": "12",
+    "section_name": "ABM 12-A",
+    "school_year": "2026-2027",
+    "max_slots": 40,
+    "status": "Open"
+  },
+  {
+    "section_id": 9,
+    "strand_id": 3,
+    "adviser_id": 1,
+    "grade_level": "11",
+    "section_name": "HUMSS 11-A",
+    "school_year": "2026-2027",
+    "max_slots": 45,
+    "status": "Open"
+  },
+  {
+    "section_id": 11,
+    "strand_id": 3,
+    "adviser_id": 1,
+    "grade_level": "12",
+    "section_name": "HUMSS 12-A",
+    "school_year": "2026-2027",
+    "max_slots": 42,
+    "status": "Open"
+  },
+  {
+    "section_id": 13,
+    "strand_id": 5,
+    "adviser_id": 1,
+    "grade_level": "11",
+    "section_name": "ICT 11-A",
+    "school_year": "2026-2027",
+    "max_slots": 35,
+    "status": "Open"
+  }
+]

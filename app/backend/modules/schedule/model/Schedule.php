@@ -7,14 +7,10 @@ class Schedule
     $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $query["date"] ?? "")
       ? $query["date"]
       : date("Y-m-d");
-    $status = in_array($query["status"] ?? "all", ["all", "Scheduled", "Cancelled", "Done"], true)
-      ? $query["status"] ?? "all"
-      : "all";
     return [
       "role" => $role,
       "user_id" => 1,
       "selected_date" => $date,
-      "filter_status" => $status,
       "subjects" => [],
       "events" => [],
       "calendar_events" => [],

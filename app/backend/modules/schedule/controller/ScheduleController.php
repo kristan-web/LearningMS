@@ -47,7 +47,6 @@ try {
     $data["user_id"],
     $data["section_id"],
     $data["selected_date"],
-    $data["filter_status"],
   );
   $data["calendar_events"] = $dao->calendarEvents(
     $data["events"],

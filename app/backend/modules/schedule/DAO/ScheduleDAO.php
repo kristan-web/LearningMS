@@ -72,13 +72,8 @@ class ScheduleDAO
     int $userId,
     ?int $sectionId,
     string $date,
-    string $status,
   ): array {
     [$sql, $params] = $this->eventQuery($role, $userId, $sectionId, $date);
-    if ($status !== "all") {
-      $sql .= " AND e.status = ?";
-      $params[] = $status;
-    }
     $sql .= " ORDER BY e.start_datetime";
     return $this->fetch($sql, $params);
   }
@@ -175,7 +170,11 @@ class ScheduleDAO
             "start" => $cursor->format("Y-m-d") . "T" . substr($item["start_time"], 0, 5),
             "end" => $cursor->format("Y-m-d") . "T" . substr($item["end_time"], 0, 5),
             "className" => "calendar-schedule",
-            "extendedProps" => ["section" => $item["section_name"]],
+            "extendedProps" => [
+              "section" => $item["section_name"],
+              "subject_code" => $item["subject_code"],
+              "room_name" => $item["room_name"],
+            ],
           ];
         }
       }

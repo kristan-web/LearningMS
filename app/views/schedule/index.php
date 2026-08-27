@@ -1,3 +1,10 @@
+<?php
+if (!isset($calendar_events)) {
+    require dirname(__DIR__, 2) . "/backend/modules/schedule/controller/ScheduleController.php";
+    exit;
+}
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -19,10 +26,8 @@
                     <h1 class="text-4xl font-black tracking-tight text-slate-950">Schedule</h1>
                     <p class="mt-2 text-slate-500">Keep classes, commitments, and campus moments in one clear rhythm.</p>
                 </div>
-                <a href="?role=<?= $switch_role ?>&date=<?= urlencode(
-  $selected_date,
-) ?>&status=<?= urlencode(
-  $filter_status,
+                                <a href="?role=<?= $switch_role ?>&date=<?= urlencode(
+    $selected_date,
 ) ?>" class="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 no-underline transition hover:border-teal-500 hover:text-teal-700">
                     <?= $switch_label ?>
                 </a>
@@ -62,7 +67,7 @@
                                 <label class="form-label fw-semibold" for="title">Title</label>
                                 <input class="form-control mb-3" id="title" name="title" maxlength="150" required>
                                 <label class="form-label fw-semibold" for="subject_id">Subject</label>
-                                <select class="form-select mb-3" id="subject_id" name="subject_id" required>
+                                <select class="form-select subject-select mb-3" id="subject_id" name="subject_id" required>
                                     <option value="">Choose a subject</option>
                                     <?php foreach ($subjects as $subject): ?>
                                         <option value="<?= (int) $subject["subject_id"] ?>">
@@ -127,21 +132,6 @@
                           $selected_day_events,
                         ) ?></span>
                     </div>
-                    <form method="get" class="mb-6">
-                        <input type="hidden" name="role" value="<?= $role ?>">
-                        <input type="hidden" name="date" value="<?= htmlspecialchars(
-                          $selected_date,
-                        ) ?>">
-                        <label for="status" class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Filter status</label>
-                        <select id="status" name="status" onchange="this.form.submit()" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none">
-                            <option value="all">All statuses</option>
-                            <?php foreach (["Scheduled", "Done", "Cancelled"] as $status): ?>
-                                <option value="<?= $status ?>" <?= $filter_status === $status
-  ? "selected"
-  : "" ?>><?= $status ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </form>
                     <div class="space-y-3">
                         <?php if (!$selected_day_events): ?>
                             <div class="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-400">No events for this day.</div>
@@ -194,10 +184,13 @@
 
     <div id="delete-dialog" class="schedule-dialog" hidden>
         <div class="schedule-dialog__card" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title">
-            <h2 id="delete-dialog-title" class="text-xl font-black">Delete this item?</h2>
+            <div class="flex items-start justify-between gap-4">
+                <h2 id="delete-dialog-title" class="text-xl font-black">Delete this item?</h2>
+                <button type="button" class="schedule-icon-button" id="close-delete-dialog" aria-label="Close dialog">&times;</button>
+            </div>
             <dl id="delete-details" class="schedule-dialog__details"></dl>
-            <p class="mt-4 text-sm text-slate-500">This action cannot be undone.</p>
-            <form method="post" class="mt-6 flex justify-end gap-2">
+            <p id="delete-dialog-message" class="mt-4 text-sm text-slate-500">This action cannot be undone.</p>
+            <form method="post" id="delete-form" class="mt-6 flex justify-end gap-2">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="event_id" id="delete-event-id">
                 <button type="button" class="btn btn-light" id="cancel-delete">Cancel</button>
@@ -220,7 +213,7 @@
 
     <script src="/LearningMS/app/backend/modules/schedule/js/assets/app.bundle.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        function initializeSchedule() {
             var selectedDate = <?= json_encode($selected_date) ?>;
             var editor = document.getElementById('event-editor');
             var form = document.getElementById('event-form');
@@ -234,7 +227,7 @@
                 customButtons: {
                     addEvent: {
                         text: '+ <?= $role === "student" ? "Add note" : "Add event" ?>',
-                        click: function () { openEditor(selectedDate, null); }
+                        click: function () { openEditor(selectedDate, dateTile(selectedDate)); }
                     }
                 },
                 events: <?= json_encode(
@@ -243,15 +236,21 @@
                 ) ?>,
                 dateClick: function (info) {
                     selectedDate = info.dateStr;
-                    window.location.href = '?role=<?= $role ?>&date=' + encodeURIComponent(selectedDate) + '&status=<?= $filter_status ?>';
+                    window.location.href = '?role=<?= $role ?>&date=' + encodeURIComponent(selectedDate);
                 },
                 eventClick: function (info) {
                     if (info.event.extendedProps.editable) {
                         openEditor(info.event.startStr.slice(0, 10), info.el, info.event.extendedProps.event);
+                    } else if ('<?= $role ?>' === 'student') {
+                        openViewDialog(info.event);
                     }
                 }
             });
             calendar.render();
+
+            function dateTile(date) {
+                return document.querySelector('.fc-daygrid-day[data-date="' + date + '"]');
+            }
 
             function openEditor(date, anchor, event) {
                 selectedDate = date;
@@ -351,9 +350,16 @@
             });
 
             var deleteDialog = document.getElementById('delete-dialog');
+            var deleteDialogTitle = document.getElementById('delete-dialog-title');
+            var deleteDialogMessage = document.getElementById('delete-dialog-message');
+            var deleteForm = document.getElementById('delete-form');
             document.querySelectorAll('.delete-event').forEach(function (button) {
                 button.addEventListener('click', function () {
                     var event = JSON.parse(button.closest('article').querySelector('.edit-event').dataset.event);
+                    deleteDialogTitle.textContent = 'Delete this item?';
+                    deleteDialogMessage.textContent = 'This action cannot be undone.';
+                    deleteDialogMessage.hidden = false;
+                    deleteForm.hidden = false;
                     document.getElementById('delete-event-id').value = button.dataset.eventId;
                     renderDetails(document.getElementById('delete-details'), [
                         ['Title', event.title],
@@ -366,8 +372,43 @@
                 });
             });
             document.getElementById('cancel-delete').addEventListener('click', function () { deleteDialog.hidden = true; });
+
+            function openViewDialog(calendarEvent) {
+                var event = calendarEvent.extendedProps.event || {};
+                var props = calendarEvent.extendedProps;
+                deleteDialogTitle.textContent = 'Event details';
+                deleteDialogMessage.hidden = true;
+                deleteForm.hidden = true;
+                renderDetails(document.getElementById('delete-details'), [
+                    ['Title', calendarEvent.title],
+                    ['Description', event.description || 'None'],
+                    ['Subject', event.subject_code || props.subject_code || 'General'],
+                    ['Section', props.section || 'Not specified'],
+                    ['Room', props.room_name || 'Not specified'],
+                    ['Type', event.event_type || 'Class schedule'],
+                    ['Status', event.status || 'Scheduled'],
+                    ['Starts', formatEventDate(calendarEvent.start)],
+                    ['Ends', formatEventDate(calendarEvent.end)]
+                ]);
+                deleteDialog.hidden = false;
+            }
+
+            function formatEventDate(date) {
+                return date ? new Intl.DateTimeFormat(undefined, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                }).format(date) : 'Not specified';
+            }
+
+            document.getElementById('close-delete-dialog').addEventListener('click', function () { deleteDialog.hidden = true; });
             window.addEventListener('resize', function () { if (!editor.hidden) positionEditor(null); });
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeSchedule);
+        } else {
+            initializeSchedule();
+        }
     </script>
 </body>
 </html>

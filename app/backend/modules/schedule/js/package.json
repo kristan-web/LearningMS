@@ -1,0 +1,31 @@
+{
+  "name": "schedule",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "npx @tailwindcss/cli -i ./input.css -o ./output.css --minify",
+    "build:assets": "esbuild assets/app.js --bundle --minify --outfile=assets/app.bundle.js && esbuild assets/app.css --bundle --minify --outfile=assets/app.bundle.css",
+    "build": "npm run build:css && npm run build:assets",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.21",
+    "@fullcalendar/daygrid": "^6.1.21",
+    "@fullcalendar/interaction": "^6.1.21",
+    "@tailwindcss/cli": "^4.3.3",
+    "bootstrap": "^5.3.8",
+    "esbuild": "^0.28.2",
+    "react": "^17.0.2",
+    "react-alert": "^7.0.3",
+    "react-alert-template-basic": "^1.0.2",
+    "react-dom": "^17.0.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.25.0",
+    "prettier": "^3.9.6"
+  }
+}

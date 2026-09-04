@@ -2,7 +2,7 @@
 /**
  * AccountDAO
  *
- * Data-access layer for the `student_account` table. Provides:
+ * Data-access layer for the `lms_accounts` table. Provides:
  *   - Standard CRUD: create, read (one / by-field / list), update, delete
  *   - Login authentication with built-in rate-limiting (failed_login_count,
  *     locked_until) and lockout semantics
@@ -26,6 +26,9 @@ class AccountDAO
   /** How long a temporary lockout lasts (minutes). */
   public const LOCKOUT_MINUTES = 15;
 
+  /** The table name used by this DAO */
+  private const TABLE = "lms_accounts";
+
   public function __construct(private PDO $db)
   {
   }
@@ -36,8 +39,8 @@ class AccountDAO
    * ================================================================== */
 
   /**
-   * Insert a new student_account row. The Account must carry at minimum
-   * student_id, username and password_hash; everything else defaults.
+   * Insert a new lms_accounts row. The Account must carry at minimum
+   * entity_id, entity_type, username and password_hash; everything else defaults.
    * Returns the same Account, now stamped with the DB-generated
    * created_at / updated_at values.
    */
@@ -46,12 +49,14 @@ class AccountDAO
     $data = $account->toArray();
     // The DB owns these two timestamps; let it fill them in.
     unset($data["created_at"], $data["updated_at"]);
+    // account_id is auto-generated
+    unset($data["account_id"]);
 
     $columns        = array_keys($data);
     $placeholders   = array_map(fn($c) => ":{$c}", $columns);
 
     $sql =
-      "INSERT INTO student_account (" .
+      "INSERT INTO " . self::TABLE . " (" .
       implode(", ", $columns) .
       ") VALUES (" .
       implode(", ", $placeholders) .
@@ -63,19 +68,38 @@ class AccountDAO
     }
     $stmt->execute();
 
-    return $this->findByStudentId($account->getStudentId()) ?? $account;
+    // Get the auto-generated account_id
+    $accountId = (int) $this->db->lastInsertId();
+    $account->setAccountId($accountId);
+
+    // Fetch the fresh record to get timestamps
+    $fresh = $this->findByAccountId($accountId);
+    return $fresh ?? $account;
   }
 
   /* ====================================================================
    *  READ
    * ================================================================== */
 
-  /** Find a single account by its primary key (students.student_id). */
-  public function findByStudentId(int $studentId): ?Account
+  /** Find a single account by its primary key (account_id). */
+  public function findByAccountId(int $accountId): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account WHERE student_id = :id",
-      [":id" => $studentId]
+      "SELECT * FROM " . self::TABLE . " WHERE account_id = :id",
+      [":id" => $accountId]
+    );
+    return $row ? Account::hydrate($row) : null;
+  }
+
+  /**
+   * Find a single account by entity_id and entity_type.
+   * This is the primary way to find a student or teacher account.
+   */
+  public function findByEntity(int $entityId, string $entityType): ?Account
+  {
+    $row = $this->fetchOne(
+      "SELECT * FROM " . self::TABLE . " WHERE entity_id = :id AND entity_type = :type",
+      [":id" => $entityId, ":type" => $entityType]
     );
     return $row ? Account::hydrate($row) : null;
   }
@@ -84,7 +108,7 @@ class AccountDAO
   public function findByUsername(string $username): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account WHERE username = :u",
+      "SELECT * FROM " . self::TABLE . " WHERE username = :u",
       [":u" => $username]
     );
     return $row ? Account::hydrate($row) : null;
@@ -94,7 +118,7 @@ class AccountDAO
   public function findByUserId(int $userId): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account WHERE user_id = :u",
+      "SELECT * FROM " . self::TABLE . " WHERE user_id = :u",
       [":u" => $userId]
     );
     return $row ? Account::hydrate($row) : null;
@@ -104,7 +128,7 @@ class AccountDAO
   public function findByRecoveryEmail(string $email): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account WHERE recovery_email = :e",
+      "SELECT * FROM " . self::TABLE . " WHERE recovery_email = :e",
       [":e" => $email]
     );
     return $row ? Account::hydrate($row) : null;
@@ -117,7 +141,7 @@ class AccountDAO
   public function findByResetToken(string $token): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account
+      "SELECT * FROM " . self::TABLE . "
         WHERE password_reset_token = :t
           AND password_reset_expires_at IS NOT NULL
           AND password_reset_expires_at >= NOW()
@@ -131,7 +155,7 @@ class AccountDAO
   public function findByVerificationToken(string $token): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account WHERE email_verification_token = :t",
+      "SELECT * FROM " . self::TABLE . " WHERE email_verification_token = :t",
       [":t" => $token]
     );
     return $row ? Account::hydrate($row) : null;
@@ -141,7 +165,7 @@ class AccountDAO
   public function findByRememberToken(string $token): ?Account
   {
     $row = $this->fetchOne(
-      "SELECT * FROM student_account WHERE remember_token = :t",
+      "SELECT * FROM " . self::TABLE . " WHERE remember_token = :t",
       [":t" => $token]
     );
     return $row ? Account::hydrate($row) : null;
@@ -155,18 +179,28 @@ class AccountDAO
    */
   public function listAll(
     ?string $status = null,
+    ?string $entityType = null,
     ?int $limit = null,
     ?int $offset = null,
   ): array {
-    $sql    = "SELECT * FROM student_account";
+    $sql    = "SELECT * FROM " . self::TABLE;
     $params = [];
+    $where  = [];
 
     if ($status !== null) {
-      $sql          .= " WHERE status = :s";
-      $params[":s"]  = $status;
+      $where[]        = "status = :s";
+      $params[":s"]   = $status;
+    }
+    if ($entityType !== null) {
+      $where[]         = "entity_type = :et";
+      $params[":et"]   = $entityType;
     }
 
-    $sql .= " ORDER BY created_at DESC, student_id DESC";
+    if (!empty($where)) {
+      $sql .= " WHERE " . implode(" AND ", $where);
+    }
+
+    $sql .= " ORDER BY created_at DESC, account_id DESC";
 
     if ($limit !== null) {
       $sql .= " LIMIT " . (int) $limit;
@@ -180,18 +214,18 @@ class AccountDAO
   }
 
   /**
-   * Check whether a username is already taken. Pass $excludeStudentId
+   * Check whether a username is already taken. Pass $excludeAccountId
    * when validating a username change on an existing account so the
    * account's own row is ignored.
    */
-  public function existsByUsername(string $username, ?int $excludeStudentId = null): bool
+  public function existsByUsername(string $username, ?int $excludeAccountId = null): bool
   {
-    $sql    = "SELECT 1 FROM student_account WHERE username = :u";
+    $sql    = "SELECT 1 FROM " . self::TABLE . " WHERE username = :u";
     $params = [":u" => $username];
 
-    if ($excludeStudentId !== null) {
-      $sql                       .= " AND student_id <> :sid";
-      $params[":sid"]             = $excludeStudentId;
+    if ($excludeAccountId !== null) {
+      $sql                  .= " AND account_id <> :aid";
+      $params[":aid"]        = $excludeAccountId;
     }
 
     $stmt = $this->db->prepare($sql);
@@ -206,14 +240,14 @@ class AccountDAO
 
   /**
    * Persist any mutable field on the account. The primary key
-   * (student_id) is intentionally NOT updated. Returns the freshly
+   * (account_id) is intentionally NOT updated. Returns the freshly
    * re-hydrated row from the DB.
    */
   public function update(Account $account): Account
   {
-    $studentId = $account->getStudentId();
+    $accountId = $account->getAccountId();
     $data      = $account->toArray();
-    unset($data["student_id"], $data["created_at"], $data["updated_at"]);
+    unset($data["account_id"], $data["created_at"], $data["updated_at"]);
 
     $assignments = [];
     foreach (array_keys($data) as $column) {
@@ -221,25 +255,25 @@ class AccountDAO
     }
 
     $sql =
-      "UPDATE student_account SET " .
+      "UPDATE " . self::TABLE . " SET " .
       implode(", ", $assignments) .
-      " WHERE student_id = :student_id";
+      " WHERE account_id = :account_id";
 
     $stmt = $this->db->prepare($sql);
     foreach ($data as $column => $value) {
       $stmt->bindValue(":{$column}", $value);
     }
-    $stmt->bindValue(":student_id", $studentId, PDO::PARAM_INT);
+    $stmt->bindValue(":account_id", $accountId, PDO::PARAM_INT);
     $stmt->execute();
 
-    return $this->findByStudentId($studentId) ?? $account;
+    return $this->findByAccountId($accountId) ?? $account;
   }
 
   /** Update only the password hash + bookkeeping timestamps. */
-  public function updatePassword(int $studentId, string $passwordHash): void
+  public function updatePassword(int $accountId, string $passwordHash): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET password_hash = :h,
               password_changed_at = NOW(),
               must_change_password = 0,
@@ -247,96 +281,96 @@ class AccountDAO
               locked_until = NULL,
               password_reset_token = NULL,
               password_reset_expires_at = NULL
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
-    $stmt->execute([":h" => $passwordHash, ":id" => $studentId]);
+    $stmt->execute([":h" => $passwordHash, ":id" => $accountId]);
   }
 
   /**
    * Change the account's status (Active / Inactive / Locked / Suspended /
    * Pending Verification).
    */
-  public function updateStatus(int $studentId, string $status): void
+  public function updateStatus(int $accountId, string $status): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account SET status = :s WHERE student_id = :id"
+      "UPDATE " . self::TABLE . " SET status = :s WHERE account_id = :id"
     );
-    $stmt->execute([":s" => $status, ":id" => $studentId]);
+    $stmt->execute([":s" => $status, ":id" => $accountId]);
   }
 
   /** Replace the remember-me cookie token. */
-  public function setRememberToken(int $studentId, ?string $token): void
+  public function setRememberToken(int $accountId, ?string $token): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account SET remember_token = :t WHERE student_id = :id"
+      "UPDATE " . self::TABLE . " SET remember_token = :t WHERE account_id = :id"
     );
-    $stmt->execute([":t" => $token, ":id" => $studentId]);
+    $stmt->execute([":t" => $token, ":id" => $accountId]);
   }
 
   /** Issue (or replace) a password-reset token. */
   public function setPasswordResetToken(
-    int $studentId,
+    int $accountId,
     string $token,
     int $expiresInMinutes = 60,
   ): void {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET password_reset_token = :t,
               password_reset_expires_at = DATE_ADD(NOW(), INTERVAL :m MINUTE)
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
     $stmt->execute([
       ":t" => $token,
       ":m" => $expiresInMinutes,
-      ":id" => $studentId,
+      ":id" => $accountId,
     ]);
   }
 
   /** Issue (or replace) an email-verification token. */
-  public function setEmailVerificationToken(int $studentId, string $token): void
+  public function setEmailVerificationToken(int $accountId, string $token): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET email_verification_token = :t
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
-    $stmt->execute([":t" => $token, ":id" => $studentId]);
+    $stmt->execute([":t" => $token, ":id" => $accountId]);
   }
 
 
   /** Mark an account's email as verified and clear the verification token. */
-  public function markEmailVerified(int $studentId): void
+  public function markEmailVerified(int $accountId): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET email_verified_at = NOW(),
               email_verification_token = NULL,
               status = CASE
                 WHEN status = 'Pending Verification' THEN 'Active'
                 ELSE status
               END
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
-    $stmt->execute([":id" => $studentId]);
+    $stmt->execute([":id" => $accountId]);
   }
 
   /**
    * Stamp a successful login. Resets failed-login counters and unlocks
    * the row if it was temporarily locked.
    */
-  public function recordLogin(int $studentId, ?string $ipAddress = null): void
+  public function recordLogin(int $accountId, ?string $ipAddress = null): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET last_login_at = NOW(),
               last_login_ip = :ip,
               failed_login_count = 0,
               locked_until = NULL
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
     $stmt->execute([
       ":ip" => $ipAddress,
-      ":id" => $studentId,
+      ":id" => $accountId,
     ]);
   }
 
@@ -345,44 +379,44 @@ class AccountDAO
    * MAX_FAILED_ATTEMPTS, set status='Locked' and locked_until accordingly.
    * Returns the new count.
    */
-  public function incrementFailedLogins(int $studentId): int
+  public function incrementFailedLogins(int $accountId): int
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET failed_login_count = failed_login_count + 1
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
-    $stmt->execute([":id" => $studentId]);
+    $stmt->execute([":id" => $accountId]);
 
     $row   = $this->fetchOne(
-      "SELECT failed_login_count FROM student_account WHERE student_id = :id",
-      [":id" => $studentId]
+      "SELECT failed_login_count FROM " . self::TABLE . " WHERE account_id = :id",
+      [":id" => $accountId]
     );
     $count = (int) ($row["failed_login_count"] ?? 0);
 
     if ($count >= self::MAX_FAILED_ATTEMPTS) {
       $lock = $this->db->prepare(
-        "UPDATE student_account
+        "UPDATE " . self::TABLE . "
             SET status = 'Locked',
                 locked_until = DATE_ADD(NOW(), INTERVAL :m MINUTE)
-          WHERE student_id = :id"
+          WHERE account_id = :id"
       );
-      $lock->execute([":m" => self::LOCKOUT_MINUTES, ":id" => $studentId]);
+      $lock->execute([":m" => self::LOCKOUT_MINUTES, ":id" => $accountId]);
     }
 
     return $count;
   }
 
   /** Reset the failed-login counter (e.g. after manual unlock). */
-  public function clearFailedLogins(int $studentId): void
+  public function clearFailedLogins(int $accountId): void
   {
     $stmt = $this->db->prepare(
-      "UPDATE student_account
+      "UPDATE " . self::TABLE . "
           SET failed_login_count = 0,
               locked_until = NULL
-        WHERE student_id = :id"
+        WHERE account_id = :id"
     );
-    $stmt->execute([":id" => $studentId]);
+    $stmt->execute([":id" => $accountId]);
   }
 
   /* ====================================================================
@@ -390,16 +424,14 @@ class AccountDAO
    * ================================================================== */
 
   /**
-   * Hard-delete a student_account row. Note: the FK is ON DELETE CASCADE
-   * from `students`, so deleting the parent student row already wipes
-   * the account; this method exists for explicit, manual cleanup.
+   * Hard-delete a lms_accounts row.
    */
-  public function delete(int $studentId): void
+  public function delete(int $accountId): void
   {
     $stmt = $this->db->prepare(
-      "DELETE FROM student_account WHERE student_id = :id"
+      "DELETE FROM " . self::TABLE . " WHERE account_id = :id"
     );
-    $stmt->execute([":id" => $studentId]);
+    $stmt->execute([":id" => $accountId]);
   }
 
 
@@ -454,15 +486,14 @@ class AccountDAO
 
     if (!$account) {
       // Run a dummy verify to keep timing roughly constant.
-      // NOTE: the dummy hash MUST be in single quotes — bcrypt
-      // hashes contain literal "$" characters that PHP would
-      // otherwise treat as variable-interpolation markers.
       password_verify(
         $password,
         '$2y$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalida'
       );
       return $empty;
     }
+
+    $accountId = $account->getAccountId();
 
     // Lockout-by-time check (e.g. previously locked for 15 minutes).
     $lockedUntil = $account->getLockedUntil();
@@ -488,7 +519,7 @@ class AccountDAO
     }
 
     if (!password_verify($password, $account->getPasswordHash())) {
-      $newCount           = $this->incrementFailedLogins($account->getStudentId());
+      $newCount           = $this->incrementFailedLogins($accountId);
       $attemptsRemaining  = max(0, self::MAX_FAILED_ATTEMPTS - $newCount);
       $justLocked          = $newCount >= self::MAX_FAILED_ATTEMPTS;
 
@@ -507,11 +538,10 @@ class AccountDAO
     }
 
     // Credentials OK — record success and reset counters.
-    $this->recordLogin($account->getStudentId(), $ipAddress);
-
+    $this->recordLogin($accountId, $ipAddress);
 
     // Refresh the in-memory copy so callers see the new last_login_*.
-    $account = $this->findByStudentId($account->getStudentId()) ?? $account;
+    $account = $this->findByAccountId($accountId) ?? $account;
 
     if ($account->getMustChangePassword()) {
       return [
@@ -575,4 +605,3 @@ class AccountDAO
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 }
-

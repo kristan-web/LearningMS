@@ -2,9 +2,8 @@
 /**
  * Account
  *
- * Entity / data-transfer object that maps 1:1 to the `student_account`
- * table defined in
- *   app/backend/modules/accounts/database/student_account.sql
+ * Entity / data-transfer object that maps 1:1 to the `lms_accounts`
+ * table in the database.
  *
  * The class exposes one private property per SQL column, together with
  * strict typed getters and setters. A `hydrate()` static factory is
@@ -33,9 +32,22 @@ class Account
     self::STATUS_PENDING_VERIFICATION,
   ];
 
-  /* ---- Properties (one per student_account column) --------------------- */
-  private int $studentId;
+  /* ---- Entity types (matches the SQL ENUM definition) -------------------- */
+  public const ENTITY_TYPE_STUDENT = "student";
+  public const ENTITY_TYPE_TEACHER = "teacher";
+  public const ENTITY_TYPE_ADMIN   = "admin";
+
+  public const ENTITY_TYPES = [
+    self::ENTITY_TYPE_STUDENT,
+    self::ENTITY_TYPE_TEACHER,
+    self::ENTITY_TYPE_ADMIN,
+  ];
+
+  /* ---- Properties (one per lms_accounts column) --------------------- */
+  private int $accountId;
   private ?int $userId = null;
+  private int $entityId;
+  private string $entityType = self::ENTITY_TYPE_STUDENT;
   private string $username;
   private string $passwordHash;
   private ?string $recoveryEmail = null;
@@ -60,22 +72,23 @@ class Account
   private ?string $updatedAt = null;
 
   /* ---- Constructor ------------------------------------------------------ */
-  public function __construct(int $studentId, string $username, string $passwordHash)
+  public function __construct(int $entityId, string $entityType, string $username, string $passwordHash)
   {
-    $this->setStudentId($studentId);
+    $this->setEntityId($entityId);
+    $this->setEntityType($entityType);
     $this->setUsername($username);
     $this->setPasswordHash($passwordHash);
   }
 
-  /* ---- student_id (PK) -------------------------------------------------- */
-  public function getStudentId(): int
+  /* ---- account_id (PK) -------------------------------------------------- */
+  public function getAccountId(): int
   {
-    return $this->studentId;
+    return $this->accountId;
   }
 
-  public function setStudentId(int $studentId): void
+  public function setAccountId(int $accountId): void
   {
-    $this->studentId = $studentId;
+    $this->accountId = $accountId;
   }
 
   /* ---- user_id ---------------------------------------------------------- */
@@ -87,6 +100,33 @@ class Account
   public function setUserId(?int $userId): void
   {
     $this->userId = $userId;
+  }
+
+  /* ---- entity_id -------------------------------------------------------- */
+  public function getEntityId(): int
+  {
+    return $this->entityId;
+  }
+
+  public function setEntityId(int $entityId): void
+  {
+    $this->entityId = $entityId;
+  }
+
+  /* ---- entity_type ------------------------------------------------------ */
+  public function getEntityType(): string
+  {
+    return $this->entityType;
+  }
+
+  public function setEntityType(string $entityType): void
+  {
+    if (!in_array($entityType, self::ENTITY_TYPES, true)) {
+      throw new InvalidArgumentException(
+        "Invalid entity type: \"{$entityType}\". Must be one of: " . implode(", ", self::ENTITY_TYPES)
+      );
+    }
+    $this->entityType = $entityType;
   }
 
   /* ---- username --------------------------------------------------------- */
@@ -187,9 +227,6 @@ class Account
     $this->failedLoginCount = $failedLoginCount;
   }
 
-
-
-
   /* ---- locked_until ----------------------------------------------------- */
   public function getLockedUntil(): ?string
   {
@@ -289,8 +326,6 @@ class Account
     $this->twoFactorSecret = $twoFactorSecret;
   }
 
-
-
   /* ---- remember_token --------------------------------------------------- */
   public function getRememberToken(): ?string
   {
@@ -352,16 +387,20 @@ class Account
   /**
    * Build an Account from a database row (snake_case keys, as returned by
    * PDO::FETCH_ASSOC). Unknown keys are ignored so the method is safe to
-   * call with the result of any SELECT on `student_account`.
+   * call with the result of any SELECT on `lms_accounts`.
    */
   public static function hydrate(array $row): self
   {
-    $studentId    = (int) ($row["student_id"] ?? 0);
-    $username     = (string) ($row["username"] ?? "");
+    $entityId    = (int) ($row["entity_id"] ?? 0);
+    $entityType  = (string) ($row["entity_type"] ?? self::ENTITY_TYPE_STUDENT);
+    $username    = (string) ($row["username"] ?? "");
     $passwordHash = (string) ($row["password_hash"] ?? "");
 
-    $account = new self($studentId, $username, $passwordHash);
+    $account = new self($entityId, $entityType, $username, $passwordHash);
 
+    if (array_key_exists("account_id", $row)) {
+      $account->setAccountId((int) $row["account_id"]);
+    }
     if (array_key_exists("user_id", $row)) {
       $account->setUserId(
         $row["user_id"] === null ? null : (int) $row["user_id"]
@@ -485,15 +524,17 @@ class Account
 
   /**
    * Convert the entity to a database-friendly associative array
-   * (snake_case keys matching the `student_account` columns).
+   * (snake_case keys matching the `lms_accounts` columns).
    * Booleans are normalized to 0/1 so they can be bound directly to
    * PDO statements that expect integer TINYINT values.
    */
   public function toArray(): array
   {
     return [
-      "student_id"                => $this->studentId,
+      "account_id"                => $this->accountId ?? null,
       "user_id"                   => $this->userId,
+      "entity_id"                 => $this->entityId,
+      "entity_type"               => $this->entityType,
       "username"                  => $this->username,
       "password_hash"             => $this->passwordHash,
       "recovery_email"            => $this->recoveryEmail,
@@ -519,4 +560,3 @@ class Account
     ];
   }
 }
-

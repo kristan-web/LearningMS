@@ -3,7 +3,7 @@
  *
  * Shared front-end validation for the Accounts module. Drives both:
  *   - public/student-login.php  (login form: identifier + password)
- *   - public/student-signup.php (registration form: 12 personal + account fields)
+ *   - public/student-signup.php (registration form: Student + Teacher tabs)
  *
  * Pure vanilla JS, no dependencies. The same DOM-contract pattern is used on
  * every page; the script auto-detects which page it's on and wires only the
@@ -23,6 +23,8 @@
  *
  *   Examples for signup:       signupForm, signupAlert, signupButton,
  *                              signupFirstNameInput, signupFirstNameError, ...
+ *   Examples for teacher:      teacherSignupForm, teacherSignupAlert, teacherSignupButton,
+ *                              teacherSignupFirstNameInput, teacherSignupFirstNameError, ...
  * ========================================================================== */
 
 (function () {
@@ -37,35 +39,19 @@
 
     const ENDPOINTS = {
         login:          ACCOUNTS_API + "?action=login",
-        register:       ACCOUNTS_API + "?action=register",
+        registerStudent: ACCOUNTS_API + "?action=register_student",
+        registerTeacher: ACCOUNTS_API + "?action=register_teacher",
         checkUsername:  ACCOUNTS_API + "?action=check_username"
     };
 
-    // The same DOM-contract is used by every wiring helper:
-    //   <formId>Form    - the <form> element
-    //   <formId>Alert   - the top-of-form summary alert
-    //   <formId>Button  - the submit button
-    //   <fieldId>Input  - the input/select for a field
-    //   <fieldId>Error  - the inline <p> under a field
-    // Forms opt in by declaring a <formId> on its data attribute (see wirings).
-
     // ---- Validation rules ---------------------------------------------------
-    // (Note: the actual password complexity policy is intentionally NOT shown
-    // to the end user as a bullet list. We only report the specific rule a
-    // user is currently violating, e.g. "Password must include a number.")
-
     const RULES = {
-        // Identifier may be either a valid email or a 3-32 char username
-        // using lowercase letters, digits, dot, underscore or dash.
         identifier: {
             minLength: 3,
-            maxLength: 32,
+            maxLength: 50,
             usernamePattern: /^[a-z0-9._-]+$/,
-            // Pragmatic email regex — covers virtually all real-world cases
-            // without trying to fully implement RFC 5322.
             emailPattern: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
         },
-        // Password: 8-128 chars, at least one lower, upper, digit and symbol.
         password: {
             minLength: 8,
             maxLength: 128,
@@ -74,11 +60,9 @@
             hasDigit:   /[0-9]/,
             hasSymbol:  /[^A-Za-z0-9]/
         },
-        // Personal-info fields, used by the signup form.
         name: {
             minLength: 1,
             maxLength: 50,
-            // Allow letters (including accented), spaces, hyphen, apostrophe, period.
             pattern: /^[\p{L}\s.'-]+$/u
         },
         email: {
@@ -86,7 +70,6 @@
             pattern: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
         },
         phone: {
-            // Accept digits, spaces, +, -, parentheses. 7-20 visible chars.
             minLength: 7,
             maxLength: 25,
             pattern: /^[+0-9()\-\s]+$/
@@ -95,7 +78,6 @@
             minLength: 5,
             maxLength: 255
         },
-        // ISO date "YYYY-MM-DD". Real validity is also checked via Date.parse.
         birthdate: {
             minAge: 10,
             maxAge: 100
@@ -104,8 +86,6 @@
 
 
     // ---- Validation functions ----------------------------------------------
-    // Each validator is a pure function that takes the raw value and a
-    // `required` flag, and returns either an error message string or null.
 
     function validateIdentifierValue(raw, required) {
         const value = (raw || "").trim();
@@ -273,8 +253,6 @@
 
     // ---- UI feedback helpers -----------------------------------------------
 
-    // Tailwind class groups we add/remove to mark a field as invalid/valid.
-    // Kept in arrays so we can re-apply the base style cleanly.
     const BASE_INPUT_CLASSES = [
         "bg-white", "border", "border-gray-300", "rounded",
         "px-4", "py-2", "mb-3", "text-sm", "text-gray-900",
@@ -298,7 +276,6 @@
             "border-green-500",
             "focus:border-green-500", "focus:ring-green-400"
         );
-        // Ensure the base look is intact (e.g. if the HTML forgot a class).
         BASE_INPUT_CLASSES.forEach(function (c) {
             if (!input.classList.contains(c)) {
                 input.classList.add(c);
@@ -328,8 +305,6 @@
     }
 
     function markNeutral(input, errorEl) {
-        // Field has a value but hasn't been validated yet, OR it's empty
-        // in live mode — show no error, no green border.
         resetFieldStyles(input);
         input.removeAttribute("aria-invalid");
         if (errorEl) {
@@ -362,7 +337,6 @@
           +   "</div>"
           + "</div>";
         alertBox.classList.remove("hidden");
-        // Bring the alert into view for keyboard / screen-reader users.
         alertBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
@@ -375,8 +349,6 @@
             .replace(/'/g, "&#39;");
     }
 
-    // Hide the summary alert as soon as there are no longer any visible
-    // field-level errors, so it doesn't linger after the user has fixed things.
     function hideAlertIfNoErrors(alertBox, errorEls) {
         if (!alertBox) { return; }
         const anyVisible = (errorEls || []).some(function (el) {
@@ -390,7 +362,6 @@
 
     // ---- Submit + live validation wiring -----------------------------------
 
-    // Debounce: avoid validating on every keystroke, but feel responsive.
     function debounce(fn, delay) {
         let t = null;
         return function () {
@@ -403,14 +374,6 @@
 
     // ---- Per-form context --------------------------------------------------
 
-    /**
-     * Build a context object for a single form on the page. Returns null if
-     * the form, alert, or submit button is missing (caller can short-circuit).
-     *
-     * @param {string} formId   e.g. "login" -> looks up #loginForm, #loginAlert, #loginButton
-     * @param {Array}  fields   array of { name, validate(raw) } describing each field
-     * @param {string} fieldPrefix  e.g. "login" -> looks up #<prefix><Name>Input, #<prefix><Name>Error
-     */
     function createFormContext(formId, fields, fieldPrefix) {
         const form      = document.getElementById(formId + "Form");
         const alertBox  = document.getElementById(formId + "Alert");
@@ -423,8 +386,6 @@
             return { name: f.name, input: input, err: err, validate: f.validate };
         });
 
-        // Every field must have a DOM input; otherwise the form is half-rendered
-        // and we'd silently skip checks. Bail out so the wiring doesn't bind.
         for (let i = 0; i < bound.length; i++) {
             if (!bound[i].input) { return null; }
         }
@@ -432,10 +393,6 @@
         return { form: form, alertBox: alertBox, submitBtn: submitBtn, fields: bound };
     }
 
-    /**
-     * Run all validators as if the user clicked submit. Returns true on
-     * success, false on failure (and surfaces messages in the alert).
-     */
     function runFullValidation(ctx, options) {
         const messages = [];
         for (let i = 0; i < ctx.fields.length; i++) {
@@ -456,10 +413,6 @@
         return true;
     }
 
-    /**
-     * Validate a single field "live" (not required-empty) and update its
-     * visual state. Used as the body of a debounced input listener.
-     */
     function onFieldLive(field, ctx) {
         const raw  = field.input.value || "";
         const msg  = field.validate(raw, false);
@@ -474,10 +427,6 @@
         hideAlertIfNoErrors(ctx.alertBox, ctx.fields.map(function (f) { return f.err; }));
     }
 
-    /**
-     * Clear an individual field's inline error as soon as the user focuses
-     * it again, so the red styling doesn't feel "stuck" while they edit.
-     */
     function bindFocusClear(input, err) {
         input.addEventListener("focus", function () {
             if (err) { err.classList.add("hidden"); }
@@ -485,13 +434,8 @@
     }
 
 
-
     // ---- Loading state on the submit button --------------------------------
 
-    /**
-     * Toggle a "loading" state on a submit button. Stores the original label
-     * the first time it goes into loading so it can be restored afterwards.
-     */
     function setLoading(submitBtn, isLoading, loadingText) {
         if (!submitBtn) { return; }
         if (isLoading) {
@@ -508,11 +452,6 @@
         }
     }
 
-    /**
-     * POST a urlencoded payload to the API and return a normalised
-     * {ok, status, data} result, even when the server returns a non-JSON
-     * body or the network call throws.
-     */
     function postJson(url, payload) {
         return fetch(url, {
             method: "POST",
@@ -546,9 +485,8 @@
         });
     }
 
-    // ---- Page wirings ------------------------------------------------------
+    // ---- Helper to find a field on a context ------------------------------
 
-    // Reusable "find a field on a context by short name" helper.
     function findField(ctx, name) {
         for (let i = 0; i < ctx.fields.length; i++) {
             if (ctx.fields[i].name === name) { return ctx.fields[i]; }
@@ -556,11 +494,44 @@
         return null;
     }
 
-    /**
-     * Wire the login form. The page must contain #loginForm, #loginAlert,
-     * #loginButton, #loginIdentifierInput, #loginIdentifierError,
-     * #loginPasswordInput, #loginPasswordError. Returns true on success.
-     */
+    // ---- Tab switching -----------------------------------------------------
+
+    function initTabs() {
+        const studentTabBtn = document.getElementById("studentTabBtn");
+        const teacherTabBtn = document.getElementById("teacherTabBtn");
+        const studentForm = document.getElementById("signupForm");
+        const teacherForm = document.getElementById("teacherSignupForm");
+
+        if (!studentTabBtn || !teacherTabBtn || !studentForm || !teacherForm) {
+            return;
+        }
+
+        function switchTab(tab) {
+            // Reset both tabs
+            studentTabBtn.classList.remove("active", "text-gray-700", "bg-gray-100", "border-gray-700");
+            studentTabBtn.classList.add("text-gray-500", "bg-gray-50", "border-transparent");
+            teacherTabBtn.classList.remove("active", "text-gray-700", "bg-gray-100", "border-gray-700");
+            teacherTabBtn.classList.add("text-gray-500", "bg-gray-50", "border-transparent");
+
+            if (tab === "student") {
+                studentTabBtn.classList.remove("text-gray-500", "bg-gray-50", "border-transparent");
+                studentTabBtn.classList.add("active", "text-gray-700", "bg-gray-100", "border-gray-700");
+                studentForm.classList.remove("hidden");
+                teacherForm.classList.add("hidden");
+            } else {
+                teacherTabBtn.classList.remove("text-gray-500", "bg-gray-50", "border-transparent");
+                teacherTabBtn.classList.add("active", "text-gray-700", "bg-gray-100", "border-gray-700");
+                teacherForm.classList.remove("hidden");
+                studentForm.classList.add("hidden");
+            }
+        }
+
+        studentTabBtn.addEventListener("click", function () { switchTab("student"); });
+        teacherTabBtn.addEventListener("click", function () { switchTab("teacher"); });
+    }
+
+    // ---- Wire Login Form ---------------------------------------------------
+
     function wireLoginForm() {
         const ctx = createFormContext("login", [
             { name: "Identifier", validate: validateIdentifierValue },
@@ -572,7 +543,6 @@
         const identifierField = findField(ctx, "Identifier");
         const passwordField   = findField(ctx, "Password");
 
-        // Render a successful login response.
         function onLoginSuccess(data) {
             const reason  = (data && data.reason) || "ok";
             const message = (data && data.message) || "Login successful.";
@@ -583,32 +553,19 @@
                 markInvalid(identifierField.input, identifierField.err, "Please verify your email first.");
             }
 
-            // On a clean "ok" login we persist a small session blob so the
-            // next page (student-dashboard.php) can greet the user by their
-            // real first name. The dashboard already has a seed-driven
-            // fallback for users who reach it without logging in, so this
-            // is purely additive. We intentionally skip the redirect for
-            // must_change_password / pending_verification / inactive —
-            // those flows need the user to do something else first.
             if (reason === "ok" && data && data.account) {
                 persistStudentSession(data.account);
                 window.location.assign("/LearningMS/public/student-dashboard.php");
             }
         }
 
-        // ---- Student session bridge --------------------------------------
-        // Save the bare minimum the dashboard needs to personalize the
-        // greeting: the student_id, the legal first name (preferred) and
-        // last name, and the username as a final fallback. We use
-        // sessionStorage so the data is scoped to the current tab and
-        // disappears when the browser is closed, which is appropriate
-        // for a placeholder client-side "session" until the back-end
-        // gets real session-cookie support.
         function persistStudentSession(account) {
             try {
                 const session = {
-                    student_id:  account.student_id || null,
+                    account_id:  account.account_id || null,
                     user_id:     account.user_id    || null,
+                    entity_id:   account.entity_id  || null,
+                    entity_type: account.entity_type || null,
                     username:    account.username   || null,
                     first_name:  account.first_name || null,
                     middle_name: account.middle_name || null,
@@ -619,16 +576,9 @@
                     "lms.studentSession",
                     JSON.stringify(session)
                 );
-            } catch (storageError) {
-                // sessionStorage may be unavailable (e.g. private mode on
-                // some browsers). The redirect still works; the dashboard
-                // simply falls back to its seed-driven greeting.
-            }
+            } catch (storageError) {}
         }
 
-        // Render a failed login response. We show the server's `errors` array
-        // in the summary alert, and for known reasons we also flag the
-        // relevant field so the user sees the red border + inline message.
         function onLoginFailure(data) {
             const reason   = (data && data.reason) || "unknown";
             const messages = (data && Array.isArray(data.errors) && data.errors.length > 0)
@@ -676,7 +626,6 @@
                 });
         });
 
-        // Live validation as the user types.
         ctx.fields.forEach(function (field) {
             field.input.addEventListener("input", debounce(function () {
                 onFieldLive(field, ctx);
@@ -687,12 +636,9 @@
         return true;
     }
 
-    /**
-     * Wire the signup form. The page must contain #signupForm, #signupAlert,
-     * #signupButton plus one pair of <name>Input / <name>Error elements for
-     * every field listed in the `fieldDefs` array below.
-     */
-    function wireSignupForm() {
+    // ---- Wire Student Signup Form ------------------------------------------
+
+    function wireStudentSignupForm() {
         const fieldDefs = [
             { name: "FirstName",  validate: validateNameValue },
             { name: "MiddleName", validate: function (raw, required) {
@@ -712,9 +658,6 @@
             { name: "Username",   validate: validateIdentifierValue },
             { name: "Password",   validate: validatePasswordValue },
             { name: "Confirm",    validate: function (raw) {
-                // The `ctx` reference below is captured when the IIFE for
-                // this wiring runs, so it's safe to use it here even though
-                // it's declared later in the same function.
                 const pwd = findField(ctx, "Password");
                 return validateConfirmValue(raw, pwd ? pwd.input.value : "");
             } }
@@ -728,7 +671,6 @@
         const passwordField = findField(ctx, "Password");
         const emailField    = findField(ctx, "Email");
 
-        // Map a server-side reason code to the most likely offending field.
         function flagByReason(data) {
             const reason = (data && data.reason) || "unknown";
             const msg    = (data && Array.isArray(data.errors) && data.errors[0])
@@ -748,11 +690,15 @@
 
         function onSignupSuccess(data) {
             const message = (data && data.message) ||
-                "Account created. You can now log in.";
+                "Student account created. You can now log in.";
             showAlert(ctx.alertBox, [message], options);
             ctx.fields.forEach(function (f) { f.input.disabled = true; });
             ctx.submitBtn.disabled = true;
             setLoading(ctx.submitBtn, true, "Created");
+            
+            setTimeout(function() {
+                window.location.assign("/LearningMS/public/student-login.php");
+            }, 3000);
         }
 
         function onSignupFailure(data) {
@@ -763,9 +709,6 @@
             flagByReason(data);
         }
 
-        // When the password changes after the user has already typed a
-        // confirmation, re-validate the confirmation so the match state stays
-        // in sync without waiting for the user to type in the confirm field.
         passwordField.input.addEventListener("input", debounce(function () {
             const confirmField = findField(ctx, "Confirm");
             if (confirmField && (confirmField.input.value || "").length > 0) {
@@ -792,22 +735,133 @@
             payload.set("username",    findField(ctx, "Username").input.value.trim());
             payload.set("password",    findField(ctx, "Password").input.value);
 
-            postJson(ENDPOINTS.register, payload)
+            postJson(ENDPOINTS.registerStudent, payload)
                 .then(function (res) {
                     if (res.data && res.data.success) { onSignupSuccess(res.data); }
                     else { onSignupFailure(res.data); }
                 })
                 .finally(function () {
-                    // If the request succeeded the button is now disabled
-                    // permanently; if it failed, restore the button so the
-                    // user can correct their input and retry.
                     if (!ctx.submitBtn.disabled) { return; }
                     if (ctx.submitBtn.textContent === "Created") { return; }
                     setLoading(ctx.submitBtn, false);
                 });
         });
 
-        // Live validation as the user types.
+        ctx.fields.forEach(function (field) {
+            field.input.addEventListener("input", debounce(function () {
+                onFieldLive(field, ctx);
+            }, 200));
+            bindFocusClear(field.input, field.err);
+        });
+
+        return true;
+    }
+
+    // ---- Wire Teacher Signup Form ------------------------------------------
+
+    function wireTeacherSignupForm() {
+        const fieldDefs = [
+            { name: "FirstName",    validate: validateNameValue },
+            { name: "LastName",     validate: validateNameValue },
+            { name: "Email",        validate: validateEmailValue },
+            { name: "Phone",        validate: validatePhoneValue },
+            { name: "Specialization", validate: function (raw, required) {
+                // Specialization is optional
+                const value = (raw || "").trim();
+                if (value.length === 0) { return null; }
+                if (value.length > 150) {
+                    return "Specialization is too long (max 150 characters).";
+                }
+                return null;
+            } },
+            { name: "Username",     validate: validateIdentifierValue },
+            { name: "Password",     validate: validatePasswordValue },
+            { name: "Confirm",      validate: function (raw) {
+                const pwd = findField(ctx, "Password");
+                return validateConfirmValue(raw, pwd ? pwd.input.value : "");
+            } }
+        ];
+
+        const ctx = createFormContext("teacherSignup", fieldDefs, "teacherSignup");
+        if (!ctx) { return false; }
+
+        const options = { title: "Please fix the following before signing up:" };
+        const usernameField = findField(ctx, "Username");
+        const passwordField = findField(ctx, "Password");
+        const emailField    = findField(ctx, "Email");
+
+        function flagByReason(data) {
+            const reason = (data && data.reason) || "unknown";
+            const msg    = (data && Array.isArray(data.errors) && data.errors[0])
+                || (data && data.message) || "";
+            if (reason === "duplicate_username" || reason === "duplicate") {
+                markInvalid(usernameField.input, usernameField.err, msg);
+            } else if (reason === "duplicate_email") {
+                markInvalid(emailField.input, emailField.err, msg);
+            } else if (reason === "weak_password") {
+                markInvalid(passwordField.input, passwordField.err, msg);
+            } else if (reason === "invalid_email") {
+                markInvalid(emailField.input, emailField.err, msg);
+            } else if (reason === "missing_fields") {
+                runFullValidation(ctx, options);
+            }
+        }
+
+        function onSignupSuccess(data) {
+            const message = (data && data.message) ||
+                "Teacher account created. You can now log in.";
+            showAlert(ctx.alertBox, [message], options);
+            ctx.fields.forEach(function (f) { f.input.disabled = true; });
+            ctx.submitBtn.disabled = true;
+            setLoading(ctx.submitBtn, true, "Created");
+            
+            setTimeout(function() {
+                window.location.assign("/LearningMS/public/student-login.php");
+            }, 3000);
+        }
+
+        function onSignupFailure(data) {
+            const messages = (data && Array.isArray(data.errors) && data.errors.length > 0)
+                ? data.errors
+                : [(data && data.message) || "Registration failed. Please try again."];
+            showAlert(ctx.alertBox, messages, options);
+            flagByReason(data);
+        }
+
+        passwordField.input.addEventListener("input", debounce(function () {
+            const confirmField = findField(ctx, "Confirm");
+            if (confirmField && (confirmField.input.value || "").length > 0) {
+                onFieldLive(confirmField, ctx);
+            }
+        }, 200));
+
+        ctx.form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            if (!runFullValidation(ctx, options)) { return; }
+
+            setLoading(ctx.submitBtn, true, "Creating teacher account...");
+
+            const payload = new URLSearchParams();
+            payload.set("first_name",      findField(ctx, "FirstName").input.value.trim());
+            payload.set("last_name",       findField(ctx, "LastName").input.value.trim());
+            payload.set("email",           findField(ctx, "Email").input.value.trim());
+            payload.set("phone",           findField(ctx, "Phone").input.value.trim());
+            payload.set("specialization",  findField(ctx, "Specialization").input.value.trim());
+            payload.set("username",        findField(ctx, "Username").input.value.trim());
+            payload.set("password",        findField(ctx, "Password").input.value);
+
+            postJson(ENDPOINTS.registerTeacher, payload)
+                .then(function (res) {
+                    if (res.data && res.data.success) { onSignupSuccess(res.data); }
+                    else { onSignupFailure(res.data); }
+                })
+                .finally(function () {
+                    if (!ctx.submitBtn.disabled) { return; }
+                    if (ctx.submitBtn.textContent === "Created") { return; }
+                    setLoading(ctx.submitBtn, false);
+                });
+        });
+
         ctx.fields.forEach(function (field) {
             field.input.addEventListener("input", debounce(function () {
                 onFieldLive(field, ctx);
@@ -819,12 +873,9 @@
     }
 
     // ---- Page router -------------------------------------------------------
-    // The script auto-detects which page it's on by probing for the form's
-    // DOM id. Each wiring short-circuits if its required elements are missing,
-    // so it's safe to include this file on any page in the module.
 
+    initTabs();
     wireLoginForm();
-    wireSignupForm();
+    wireStudentSignupForm();
+    wireTeacherSignupForm();
 })();
-
-

@@ -54,7 +54,6 @@ function accounts_input(string $key): ?string
  * Returns null when the key is missing or not a valid integer.
  */
 function accounts_input_int(string $key): ?int
- 
 {
   $value = $_REQUEST[$key] ?? null;
   if ($value === null || $value === "") {
@@ -262,8 +261,10 @@ function accounts_account_to_public_array(?Account $account): ?array
     return null;
   }
   return [
-    "student_id"           => $account->getStudentId(),
+    "account_id"           => $account->getAccountId(),
     "user_id"              => $account->getUserId(),
+    "entity_id"            => $account->getEntityId(),
+    "entity_type"          => $account->getEntityType(),
     "username"             => $account->getUsername(),
     "recovery_email"       => $account->getRecoveryEmail(),
     "status"               => $account->getStatus(),
@@ -323,41 +324,38 @@ try {
     // Don't echo the password_hash or remember_token to the browser.
     $public = accounts_account_to_public_array($result["account"]);
 
-    // Look up the student's first/last name on a successful authentication
-    // so the front-end can greet the user by their real name (e.g. "Good
-    // morning, Maria") on the next page. We only do this for successful
-    // logins (including the soft-success cases like must_change_password)
-    // to avoid leaking profile data on a wrong-password attempt. The DAO
-    // hydrates only `student_account` columns, so a small targeted SELECT
-    // here is the cleanest way to attach the name without restructuring
-    // the entity / DAO layers.
-    if (
-      $result["success"] &&
-      is_array($public) &&
-      isset($public["student_id"])
-    ) {
+    // Look up the entity's name on a successful authentication
+    if ($result["success"] && is_array($public) && $public["entity_id"]) {
       try {
-        $nameStmt = $connection->prepare(
-          "SELECT first_name, middle_name, last_name " .
-          "FROM students WHERE student_id = :sid LIMIT 1"
-        );
-        $nameStmt->execute([":sid" => (int) $public["student_id"]]);
-        $nameRow = $nameStmt->fetch(PDO::FETCH_ASSOC);
-        if ($nameRow !== false) {
-          $public["first_name"]  = isset($nameRow["first_name"])
-            ? (string) $nameRow["first_name"]
-            : null;
-          $public["middle_name"] = isset($nameRow["middle_name"])
-            ? (string) $nameRow["middle_name"]
-            : null;
-          $public["last_name"]   = isset($nameRow["last_name"])
-            ? (string) $nameRow["last_name"]
-            : null;
+        $entityType = $public["entity_type"] ?? Account::ENTITY_TYPE_STUDENT;
+        $entityId   = (int) $public["entity_id"];
+
+        if ($entityType === Account::ENTITY_TYPE_STUDENT) {
+          $nameStmt = $connection->prepare(
+            "SELECT first_name, middle_name, last_name " .
+            "FROM students WHERE student_id = :id LIMIT 1"
+          );
+          $nameStmt->execute([":id" => $entityId]);
+          $nameRow = $nameStmt->fetch(PDO::FETCH_ASSOC);
+          if ($nameRow !== false) {
+            $public["first_name"]  = $nameRow["first_name"] ?? null;
+            $public["middle_name"] = $nameRow["middle_name"] ?? null;
+            $public["last_name"]   = $nameRow["last_name"] ?? null;
+          }
+        } elseif ($entityType === Account::ENTITY_TYPE_TEACHER) {
+          $nameStmt = $connection->prepare(
+            "SELECT first_name, last_name " .
+            "FROM teachers WHERE teacher_id = :id LIMIT 1"
+          );
+          $nameStmt->execute([":id" => $entityId]);
+          $nameRow = $nameStmt->fetch(PDO::FETCH_ASSOC);
+          if ($nameRow !== false) {
+            $public["first_name"]  = $nameRow["first_name"] ?? null;
+            $public["last_name"]   = $nameRow["last_name"] ?? null;
+          }
         }
       } catch (Throwable $ignored) {
-        // The name lookup is purely cosmetic; never let it block a
-        // successful login. Fall back to whatever the account row gives us
-        // (e.g. the username) if the students table is unreachable.
+        // The name lookup is purely cosmetic; never let it block a successful login.
       }
     }
 
@@ -377,24 +375,9 @@ try {
   }
 
   /* ====================================================================
-   *  REGISTER (self-service signup)
-   *
-   *  Public action called from public/student-signup.php. Creates BOTH a
-   *  new `students` row and a matching `student_account` row inside a
-   *  single transaction so the FK on student_account.student_id is never
-   *  left dangling. The student's email is also stored as
-   *  student_account.recovery_email so a future password-reset flow has
-   *  a target.
-   *
-   *  Expects POST: first_name, last_name, middle_name, email, phone,
-   *                gender, birthdate, address, grade_level, username,
-   *                password. (password_confirm is UI-only.)
-   *
-   *  Returns 201 on success with { student_id, account }, 422 with a
-   *  structured `reason` and per-field `errors` on validation failures,
-   *  409 on duplicates, 500 on unexpected DB errors.
+   *  REGISTER STUDENT (self-service signup)
    * ================================================================== */
-  if ($action === "register") {
+  if ($action === "register_student") {
     // ---- Collect + validate every field. ---------------------------------
     $firstName  = accounts_input("first_name");
     $middleName = accounts_input("middle_name");
@@ -443,18 +426,22 @@ try {
       ], 422);
     }
 
-    // ---- Pre-check uniqueness on the columns that have UNIQUE indexes. ---
+    // ---- Pre-check uniqueness --------------------------------------------
     $reason  = null;
     $message = null;
     if ($dao->existsByUsername($username, null)) {
       $reason  = "duplicate_username";
       $message = "That username is already taken.";
     } else {
-      $stmt = $connection->prepare("SELECT 1 FROM students WHERE email = :e LIMIT 1");
-      $stmt->execute([":e" => $email]);
-      if ($stmt->fetchColumn()) {
-        $reason  = "duplicate_email";
-        $message = "An account with that email already exists.";
+      try {
+        $stmt = $connection->prepare("SELECT 1 FROM students WHERE email = :e LIMIT 1");
+        $stmt->execute([":e" => $email]);
+        if ($stmt->fetchColumn()) {
+          $reason  = "duplicate_email";
+          $message = "An account with that email already exists.";
+        }
+      } catch (PDOException $e) {
+        // Table might not exist yet
       }
     }
     if ($reason !== null) {
@@ -469,14 +456,32 @@ try {
     try {
       $connection->beginTransaction();
 
-      // Auto-generate the two NOT NULL UNIQUE student identifiers. The
-      // students PK is auto-increment, so the only constraint is unique.
-      // `lrn` is VARCHAR(12) so we need a 12-char placeholder: "PEND" (4)
-      // + 8 hex digits (8) = 12. `student_number` is VARCHAR(20) so a
-      // year + dash + 5 digits is comfortably under the cap.
-      $lrn           = "PEND" . strtoupper(bin2hex(random_bytes(4)));
-      $studentNumber = date("Y") . "-" . str_pad((string) random_int(0, 99999), 5, "0", STR_PAD_LEFT);
+      // Auto-generate LRN and Student Number
+      $lrn = "PEND" . strtoupper(bin2hex(random_bytes(4)));
+      
+      $year = date("Y");
+      $randomNum = random_int(0, 99999);
+      $studentNumber = $year . "-" . str_pad((string) $randomNum, 5, "0", STR_PAD_LEFT);
+      
+      // Ensure student number is unique
+      $checkStmt = $connection->prepare("SELECT 1 FROM students WHERE student_number = :sn LIMIT 1");
+      $checkStmt->execute([":sn" => $studentNumber]);
+      while ($checkStmt->fetchColumn()) {
+        $randomNum = random_int(0, 99999);
+        $studentNumber = $year . "-" . str_pad((string) $randomNum, 5, "0", STR_PAD_LEFT);
+        $checkStmt->execute([":sn" => $studentNumber]);
+      }
 
+      // Get the active school year
+      $schoolYear = "2026-2027";
+      $syStmt = $connection->prepare("SELECT year FROM school_years WHERE status = 'active' LIMIT 1");
+      $syStmt->execute();
+      $syRow = $syStmt->fetch(PDO::FETCH_ASSOC);
+      if ($syRow !== false) {
+        $schoolYear = $syRow["year"];
+      }
+
+      // STEP 1: Insert into students table
       $studentStmt = $connection->prepare(
         "INSERT INTO students
            (lrn, student_number, first_name, last_name, middle_name,
@@ -502,57 +507,191 @@ try {
         ":contact_number"         => trim($phone),
         ":email"                  => trim($email),
         ":grade_level"            => $gradeLevel,
-        // The form doesn't ask for these, but the schema requires NOT
-        // NULL. We persist "(To be updated)" placeholders that the
-        // student / registrar can fill in later.
         ":emergency_name"         => "(To be updated)",
         ":emergency_relationship" => "(To be updated)",
         ":emergency_number"       => "(To be updated)",
       ]);
 
+      // Get the auto-generated student_id
       $newStudentId = (int) $connection->lastInsertId();
 
+      // STEP 2: Create the account with the student_id as entity_id
       $account = new Account(
-        $newStudentId,
+        $newStudentId,                       // entity_id
+        Account::ENTITY_TYPE_STUDENT,        // entity_type
         $username,
-        password_hash((string) $password, PASSWORD_BCRYPT)
+        password_hash((string) $password, PASSWORD_DEFAULT)
       );
       $account->setRecoveryEmail(trim($email));
-
-      // Self-service signup is "ready to use" out of the box: the student
-      // just chose their own password (it already passed the strength
-      // policy), they have no temporary credential to rotate, and the
-      // email they provided is the one we'll use for recovery. We therefore
-      // flip the two flags that would otherwise force a re-route on
-      // first login (`must_change_password = 1` and
-      // `status = 'Pending Verification'`) and stamp password_changed_at
-      // so audit/lockout logic that reads it gets a real timestamp.
-      //
-      // The "must change your temporary password" / "pending verification"
-      // branches of authenticate() are kept intact for any future
-      // admin-issued-temp-password flow that creates an Account with
-      // a generated credential.
       $account->setStatus(Account::STATUS_ACTIVE);
       $account->setMustChangePassword(false);
       $account->setPasswordChangedAt(date("Y-m-d H:i:s"));
 
+      // STEP 3: Insert into lms_accounts table using the DAO
       $saved = $dao->create($account);
+      
       $connection->commit();
 
       accounts_respond([
         "success"    => true,
-        "message"    => "Account created. You can now log in.",
+        "message"    => "Student account created successfully! You can now log in.",
         "student_id" => $newStudentId,
         "account"    => accounts_account_to_public_array($saved),
       ], 201);
+      
     } catch (Throwable $e) {
       if ($connection->inTransaction()) {
         $connection->rollBack();
       }
+      
+      error_log("Student registration error: " . $e->getMessage());
+      error_log("Student registration trace: " . $e->getTraceAsString());
+      
       accounts_respond([
         "success" => false,
         "reason"  => "server_error",
-        "message" => "Could not create the account. Please try again later.",
+        "message" => "Could not create the student account. Please try again later.",
+        "errors"  => ["Server error: " . $e->getMessage()],
+      ], 500);
+    }
+  }
+
+  /* ====================================================================
+   *  REGISTER TEACHER (self-service signup)
+   * ================================================================== */
+  if ($action === "register_teacher") {
+    // ---- Collect + validate every field. ---------------------------------
+    $firstName   = accounts_input("first_name");
+    $lastName    = accounts_input("last_name");
+    $email       = accounts_input("email");
+    $phone       = accounts_input("phone");
+    $specialization = accounts_input("specialization");
+    $username    = accounts_input("username");
+    $password    = $_POST["password"] ?? $_REQUEST["password"] ?? null;
+
+    $errors = [];
+    $errors = array_merge($errors, accounts_validate_name($firstName, 50));
+    $errors = array_merge($errors, accounts_validate_name($lastName, 50));
+
+    if ($email === null || trim($email) === "") {
+      $errors[] = "Email is required.";
+    } elseif (!accounts_validate_email($email)) {
+      $errors[] = "Please enter a valid email address.";
+    }
+    $errors = array_merge($errors, accounts_validate_phone($phone));
+    $errors = array_merge($errors, accounts_validate_username($username ?? ""));
+    if ($password === null || $password === "") {
+      $errors[] = "Password is required.";
+    } else {
+      $errors = array_merge($errors, accounts_validate_password((string) $password));
+    }
+    if (!empty($errors)) {
+      accounts_respond([
+        "success" => false,
+        "reason"  => "missing_fields",
+        "errors"  => $errors,
+      ], 422);
+    }
+
+    // ---- Pre-check uniqueness --------------------------------------------
+    $reason  = null;
+    $message = null;
+    if ($dao->existsByUsername($username, null)) {
+      $reason  = "duplicate_username";
+      $message = "That username is already taken.";
+    } else {
+      try {
+        $stmt = $connection->prepare("SELECT 1 FROM teachers WHERE email = :e LIMIT 1");
+        $stmt->execute([":e" => $email]);
+        if ($stmt->fetchColumn()) {
+          $reason  = "duplicate_email";
+          $message = "A teacher account with that email already exists.";
+        }
+      } catch (PDOException $e) {
+        // Table might not exist yet
+      }
+    }
+    if ($reason !== null) {
+      accounts_respond([
+        "success" => false,
+        "reason"  => $reason,
+        "errors"  => [$message],
+      ], 409);
+    }
+
+    // ---- Insert both rows in a single transaction. ----------------------
+    try {
+      $connection->beginTransaction();
+
+      // Auto-generate Teacher Number
+      $year = date("Y");
+      $randomNum = random_int(0, 99999);
+      $teacherNumber = "TCH-" . $year . "-" . str_pad((string) $randomNum, 4, "0", STR_PAD_LEFT);
+      
+      // Ensure teacher number is unique
+      $checkStmt = $connection->prepare("SELECT 1 FROM teachers WHERE teacher_number = :tn LIMIT 1");
+      $checkStmt->execute([":tn" => $teacherNumber]);
+      while ($checkStmt->fetchColumn()) {
+        $randomNum = random_int(0, 99999);
+        $teacherNumber = "TCH-" . $year . "-" . str_pad((string) $randomNum, 4, "0", STR_PAD_LEFT);
+        $checkStmt->execute([":tn" => $teacherNumber]);
+      }
+
+      // STEP 1: Insert into teachers table
+      $teacherStmt = $connection->prepare(
+        "INSERT INTO teachers
+           (teacher_number, first_name, last_name, email, contact_number, specialization, status)
+         VALUES
+           (:teacher_number, :first_name, :last_name, :email, :contact_number, :specialization, 'Active')"
+      );
+      $teacherStmt->execute([
+        ":teacher_number"  => $teacherNumber,
+        ":first_name"      => trim($firstName),
+        ":last_name"       => trim($lastName),
+        ":email"           => trim($email),
+        ":contact_number"  => trim($phone),
+        ":specialization"  => $specialization ?? null,
+      ]);
+
+      // Get the auto-generated teacher_id
+      $newTeacherId = (int) $connection->lastInsertId();
+
+      // STEP 2: Create the account with the teacher_id as entity_id
+      $account = new Account(
+        $newTeacherId,                       // entity_id
+        Account::ENTITY_TYPE_TEACHER,        // entity_type
+        $username,
+        password_hash((string) $password, PASSWORD_DEFAULT)
+      );
+      $account->setRecoveryEmail(trim($email));
+      $account->setStatus(Account::STATUS_ACTIVE);
+      $account->setMustChangePassword(false);
+      $account->setPasswordChangedAt(date("Y-m-d H:i:s"));
+
+      // STEP 3: Insert into lms_accounts table using the DAO
+      $saved = $dao->create($account);
+      
+      $connection->commit();
+
+      accounts_respond([
+        "success"    => true,
+        "message"    => "Teacher account created successfully! You can now log in.",
+        "teacher_id" => $newTeacherId,
+        "account"    => accounts_account_to_public_array($saved),
+      ], 201);
+      
+    } catch (Throwable $e) {
+      if ($connection->inTransaction()) {
+        $connection->rollBack();
+      }
+      
+      error_log("Teacher registration error: " . $e->getMessage());
+      error_log("Teacher registration trace: " . $e->getTraceAsString());
+      
+      accounts_respond([
+        "success" => false,
+        "reason"  => "server_error",
+        "message" => "Could not create the teacher account. Please try again later.",
         "errors"  => ["Server error: " . $e->getMessage()],
       ], 500);
     }
@@ -563,7 +702,7 @@ try {
    * ================================================================== */
   if ($action === "check_username") {
     $username  = accounts_input("username") ?? "";
-    $excludeId = accounts_input_int("exclude_student_id");
+    $excludeId = accounts_input_int("exclude_account_id");
     $errors    = accounts_validate_username($username);
     $available = empty($errors) && !$dao->existsByUsername($username, $excludeId);
 
@@ -573,6 +712,7 @@ try {
       "errors"    => $errors,
     ]);
   }
+  
   if ($action === "forgot_password") {
     $email = accounts_input("email") ?? accounts_input("recovery_email");
     if ($email === null) {
@@ -582,7 +722,6 @@ try {
       ]);
     }
 
-    // Always respond success to avoid leaking which emails exist.
     $ok      = true;
     $message = "If an account exists for that email, a password-reset link has been sent.";
 
@@ -590,8 +729,7 @@ try {
     if ($account !== null) {
       try {
         $token = bin2hex(random_bytes(32));
-        $dao->setPasswordResetToken($account->getStudentId(), $token);
-        // Real implementation: hand $token off to a mailer here.
+        $dao->setPasswordResetToken($account->getAccountId(), $token);
       } catch (Throwable $tokenError) {
         $ok      = false;
         $message = "Could not issue a reset token. Please try again later.";
@@ -605,7 +743,7 @@ try {
   }
 
   /* ====================================================================
-   *  RESET PASSWORD — consume a reset token + set a new password
+   *  RESET PASSWORD
    * ================================================================== */
   if ($action === "reset_password") {
     $token       = accounts_input("token");
@@ -636,8 +774,8 @@ try {
       ], 422);
     }
 
-    $hash = password_hash((string) $newPassword, PASSWORD_BCRYPT);
-    $dao->updatePassword($account->getStudentId(), $hash);
+    $hash = password_hash((string) $newPassword, PASSWORD_DEFAULT);
+    $dao->updatePassword($account->getAccountId(), $hash);
 
     accounts_respond([
       "success" => true,
@@ -647,21 +785,21 @@ try {
 
 
   /* ====================================================================
-   *  CHANGE PASSWORD — authenticated user swaps their own password
+   *  CHANGE PASSWORD
    * ================================================================== */
   if ($action === "change_password") {
-    $studentId   = accounts_input_int("student_id");
+    $accountId   = accounts_input_int("account_id");
     $oldPassword = $_POST["old_password"] ?? null;
     $newPassword = $_POST["new_password"] ?? null;
 
-    if ($studentId === null || $oldPassword === null || $newPassword === null) {
+    if ($accountId === null || $oldPassword === null || $newPassword === null) {
       accounts_respond([
         "success" => false,
-        "errors"  => ["student_id, old_password and new_password are all required."],
+        "errors"  => ["account_id, old_password and new_password are all required."],
       ]);
     }
 
-    $account = $dao->findByStudentId($studentId);
+    $account = $dao->findByAccountId($accountId);
     if ($account === null) {
       accounts_respond([
         "success" => false,
@@ -693,8 +831,8 @@ try {
       ], 422);
     }
 
-    $hash = password_hash((string) $newPassword, PASSWORD_BCRYPT);
-    $dao->updatePassword($studentId, $hash);
+    $hash = password_hash((string) $newPassword, PASSWORD_DEFAULT);
+    $dao->updatePassword($accountId, $hash);
 
     accounts_respond([
       "success" => true,
@@ -703,7 +841,7 @@ try {
   }
 
   /* ====================================================================
-   *  VERIFY EMAIL — consume a verification token
+   *  VERIFY EMAIL
    * ================================================================== */
   if ($action === "verify_email") {
     $token = accounts_input("token");
@@ -723,7 +861,7 @@ try {
       ], 400);
     }
 
-    $dao->markEmailVerified($account->getStudentId());
+    $dao->markEmailVerified($account->getAccountId());
 
     accounts_respond([
       "success" => true,
@@ -736,17 +874,21 @@ try {
    *  CREATE — staff/registrar provisions a new account
    * ================================================================== */
   if ($action === "create") {
-    $studentId    = accounts_input_int("student_id");
-    $username     = accounts_input("username");
-    $password     = $_POST["password"] ?? null;
-    $recovery     = accounts_input("recovery_email");
-    $userId       = accounts_input_int("user_id");
-    $createdBy    = accounts_input_int("created_by");
-    $status       = accounts_input("status") ?? Account::STATUS_PENDING_VERIFICATION;
+    $entityId    = accounts_input_int("entity_id");
+    $entityType  = accounts_input("entity_type") ?? Account::ENTITY_TYPE_STUDENT;
+    $username    = accounts_input("username");
+    $password    = $_POST["password"] ?? null;
+    $recovery    = accounts_input("recovery_email");
+    $userId      = accounts_input_int("user_id");
+    $createdBy   = accounts_input_int("created_by");
+    $status      = accounts_input("status") ?? Account::STATUS_PENDING_VERIFICATION;
 
     $errors = [];
-    if ($studentId === null) {
-      $errors[] = "student_id is required.";
+    if ($entityId === null) {
+      $errors[] = "entity_id is required.";
+    }
+    if (!in_array($entityType, Account::ENTITY_TYPES, true)) {
+      $errors[] = "entity_type must be one of: " . implode(", ", Account::ENTITY_TYPES);
     }
     if ($username === null) {
       $errors[] = "username is required.";
@@ -764,11 +906,14 @@ try {
     if (!empty($errors)) {
       accounts_respond(["success" => false, "errors" => $errors], 422);
     }
-    if ($dao->findByStudentId($studentId) !== null) {
+
+    // Check if account already exists for this entity
+    $existing = $dao->findByEntity($entityId, $entityType);
+    if ($existing !== null) {
       accounts_respond([
         "success" => false,
         "reason"  => "duplicate",
-        "errors"  => ["An account already exists for this student."],
+        "errors"  => ["An account already exists for this " . $entityType . "."],
       ], 409);
     }
     if ($dao->existsByUsername($username)) {
@@ -780,9 +925,10 @@ try {
     }
 
     $account = new Account(
-      $studentId,
+      $entityId,
+      $entityType,
       $username,
-      password_hash((string) $password, PASSWORD_BCRYPT)
+      password_hash((string) $password, PASSWORD_DEFAULT)
     );
     $account->setUserId($userId);
     $account->setRecoveryEmail($recovery);
@@ -800,18 +946,18 @@ try {
   }
 
   /* ====================================================================
-   *  UPDATE — staff/registrar updates one or more fields
+   *  UPDATE
    * ================================================================== */
   if ($action === "update") {
-    $studentId = accounts_input_int("student_id");
-    if ($studentId === null) {
+    $accountId = accounts_input_int("account_id");
+    if ($accountId === null) {
       accounts_respond([
         "success" => false,
-        "errors"  => ["student_id is required."],
+        "errors"  => ["account_id is required."],
       ]);
     }
 
-    $account = $dao->findByStudentId($studentId);
+    $account = $dao->findByAccountId($accountId);
     if ($account === null) {
       accounts_respond([
         "success" => false,
@@ -820,14 +966,12 @@ try {
       ], 404);
     }
 
-    // Patchable fields. Each is read independently and applied only
-    // when the request actually carries the key.
     if (($username = accounts_input("username")) !== null) {
       $errors = accounts_validate_username($username);
       if (!empty($errors)) {
         accounts_respond(["success" => false, "errors" => $errors], 422);
       }
-      if ($dao->existsByUsername($username, $studentId)) {
+      if ($dao->existsByUsername($username, $accountId)) {
         accounts_respond([
           "success" => false,
           "reason"  => "duplicate_username",
@@ -891,14 +1035,14 @@ try {
    *  DELETE
    * ================================================================== */
   if ($action === "delete") {
-    $studentId = accounts_input_int("student_id");
-    if ($studentId === null) {
+    $accountId = accounts_input_int("account_id");
+    if ($accountId === null) {
       accounts_respond([
         "success" => false,
-        "errors"  => ["student_id is required."],
+        "errors"  => ["account_id is required."],
       ]);
     }
-    $account = $dao->findByStudentId($studentId);
+    $account = $dao->findByAccountId($accountId);
     if ($account === null) {
       accounts_respond([
         "success" => false,
@@ -906,7 +1050,7 @@ try {
         "errors"  => ["Account not found."],
       ], 404);
     }
-    $dao->delete($studentId);
+    $dao->delete($accountId);
 
     accounts_respond([
       "success" => true,
@@ -918,18 +1062,18 @@ try {
    *  GET (single)
    * ================================================================== */
   if ($action === "get") {
-    $studentId = accounts_input_int("student_id");
+    $accountId = accounts_input_int("account_id");
     $username  = accounts_input("username");
 
     $account = null;
-    if ($studentId !== null) {
-      $account = $dao->findByStudentId($studentId);
+    if ($accountId !== null) {
+      $account = $dao->findByAccountId($accountId);
     } elseif ($username !== null) {
       $account = $dao->findByUsername($username);
     } else {
       accounts_respond([
         "success" => false,
-        "errors"  => ["student_id or username is required."],
+        "errors"  => ["account_id or username is required."],
       ]);
     }
 
@@ -951,9 +1095,10 @@ try {
    *  LIST (paginated)
    * ================================================================== */
   if ($action === "list") {
-    $status = accounts_input("status");
-    $limit  = accounts_input_int("limit");
-    $offset = accounts_input_int("offset");
+    $status     = accounts_input("status");
+    $entityType = accounts_input("entity_type");
+    $limit      = accounts_input_int("limit");
+    $offset     = accounts_input_int("offset");
 
     if ($status !== null && !in_array($status, Account::STATUSES, true)) {
       accounts_respond([
@@ -963,7 +1108,15 @@ try {
       ], 422);
     }
 
-    $accounts = $dao->listAll($status, $limit, $offset);
+    if ($entityType !== null && !in_array($entityType, Account::ENTITY_TYPES, true)) {
+      accounts_respond([
+        "success" => false,
+        "reason"  => "invalid_entity_type",
+        "errors"  => ["Unknown entity type filter: \"{$entityType}\"."],
+      ], 422);
+    }
+
+    $accounts = $dao->listAll($status, $entityType, $limit, $offset);
 
     accounts_respond([
       "success" => true,
@@ -976,18 +1129,18 @@ try {
   }
 
   /* ====================================================================
-   *  UNLOCK / RESET COUNTERS — manual override
+   *  UNLOCK / RESET COUNTERS
    * ================================================================== */
   if ($action === "unlock") {
-    $studentId = accounts_input_int("student_id");
-    if ($studentId === null) {
+    $accountId = accounts_input_int("account_id");
+    if ($accountId === null) {
       accounts_respond([
         "success" => false,
-        "errors"  => ["student_id is required."],
+        "errors"  => ["account_id is required."],
       ]);
     }
-    $dao->clearFailedLogins($studentId);
-    $dao->updateStatus($studentId, Account::STATUS_ACTIVE);
+    $dao->clearFailedLogins($accountId);
+    $dao->updateStatus($accountId, Account::STATUS_ACTIVE);
 
     accounts_respond([
       "success" => true,
@@ -996,12 +1149,12 @@ try {
   }
 
   /* ====================================================================
-   *  LOGOUT — clear the remember-me token server-side
+   *  LOGOUT
    * ================================================================== */
   if ($action === "logout") {
-    $studentId = accounts_input_int("student_id");
-    if ($studentId !== null) {
-      $dao->setRememberToken($studentId, null);
+    $accountId = accounts_input_int("account_id");
+    if ($accountId !== null) {
+      $dao->setRememberToken($accountId, null);
     }
     accounts_respond([
       "success" => true,
@@ -1018,10 +1171,11 @@ try {
     "errors"  => ["Unknown action: \"{$action}\"."],
   ], 400);
 } catch (Throwable $exception) {
+  error_log("AccountController fatal: " . $exception->getMessage());
+  error_log("AccountController trace: " . $exception->getTraceAsString());
   accounts_respond([
     "success" => false,
     "reason"  => "server_error",
     "error"   => $exception->getMessage(),
   ], 500);
 }
-
